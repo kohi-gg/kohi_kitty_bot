@@ -77,7 +77,7 @@ client.on(Events.InteractionCreate, async interaction => {
 
 if (process.env.DEBUG) {
 	client.login(process.env.TEST_DISCORD_TOKEN);
-	console.log("in debug mode...")
+	console.log("in debug mode...");
 } else {
 	client.login(process.env.DISCORD_TOKEN);
 }

@@ -9,8 +9,8 @@ const pool = new Client({
   password: process.env.AVIEN_DB_PASSWORD,
   port: 12436,
   ssl: {
-    rejectUnauthorized: false,
-    ca: fs.readFileSync('./avien.pem').toString()
+    rejectUnauthorized: true,
+    ca: process.env.AVIEN_SSL_CERT
   },
 });
 

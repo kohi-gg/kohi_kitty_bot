@@ -29,7 +29,7 @@ module.exports = {
           Authorization: `Bearer ${apiKey}`
         }
       });
-
+      
       await storeApiKey(discordUserId, apiKey);
 
       await interaction.editReply({ content: `API key set for ${response.data.name} successfully! 😺` });

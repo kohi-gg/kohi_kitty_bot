@@ -12,7 +12,6 @@ const commandFolders = fs.readdirSync(foldersPath);
 
 // setting up and run server
 const server = require('./server/server');
-server();
 
 for (const folder of commandFolders) {
 	const commandsPath = path.join(foldersPath, folder);
@@ -76,4 +75,11 @@ client.on(Events.InteractionCreate, async interaction => {
 	}
 });
 
-client.login(process.env.DISCORD_TOKEN);
+if (process.env.DEBUG) {
+	client.login(process.env.TEST_DISCORD_TOKEN);
+	console.log("in debug mode...")
+} else {
+	client.login(process.env.DISCORD_TOKEN);
+}
+
+server();

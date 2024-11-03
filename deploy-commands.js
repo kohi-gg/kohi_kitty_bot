@@ -24,8 +24,22 @@ for (const folder of commandFolders) {
 	}
 }
 
+let token = "";
+let clientId = "";
+let discordId = "";
+
+if (process.env.DEBUG) {
+	token = process.env.TEST_DISCORD_TOKEN;
+	clientId = process.env.TEST_CLIENT_ID;
+	discordId = process.env.TEST_DISCORD_ID
+} else {
+	token = process.env.DISCORD_TOKEN;
+	clientId = process.env.CLIENT_ID;
+	discordId = process.env.KOHI_DISCORD_ID;
+}
+
 // Construct and prepare an instance of the REST module
-const rest = new REST().setToken(process.env.DISCORD_TOKEN);
+const rest = new REST().setToken(token);
 
 // and deploy your commands!
 (async () => {
@@ -34,7 +48,7 @@ const rest = new REST().setToken(process.env.DISCORD_TOKEN);
 
 		// The put method is used to fully refresh all commands in the guild with the current set
 		const data = await rest.put(
-			Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.KOHI_DISCORD_ID),
+			Routes.applicationGuildCommands(clientId, discordId),
 			{ body: commands },
 		);
 

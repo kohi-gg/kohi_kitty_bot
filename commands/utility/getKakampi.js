@@ -61,7 +61,7 @@ module.exports = {
       try {
         const teamName = await wvwTeam(apiKey);
         const guildId = await getGuild(apiKey)
-        const roleName = `@${teamName}`;
+        const roleName = teamName;
 
         // Checking if you already set KOHI as your WvW Guild
         if (guildId !== kohiGuildId) {
@@ -71,7 +71,7 @@ module.exports = {
         }
 
         // Find the role for the user's current team
-        const currentTeamRole = member.roles.cache.find(role => teamNames.includes(role.name.replace('@', '')));
+        const currentTeamRole = member.roles.cache.find(role => teamNames.includes(role.name));
 
         // Find or create the new team role
         let teamRole = guild.roles.cache.find(role => role.name === roleName);
@@ -86,7 +86,7 @@ module.exports = {
 
         // Add the new role
         await member.roles.add(teamRole);
-        console.log(`Added role ${roleName} to user ${interaction.user.tag}`);
+        console.log(`Added role @${roleName} to user ${interaction.user.tag}`);
 
         // Remove the old role if it exists and is different from the new one
         if (currentTeamRole && currentTeamRole.name !== roleName) { 
@@ -95,7 +95,7 @@ module.exports = {
         }
 
         await interaction.editReply({
-          content: `Your WvW team is: **${teamName}**. The **${roleName}** role has been assigned to you.`
+          content: `Your WvW team is: **${teamName}**. The **@${roleName}** role has been assigned to you.`
         });
 
       } catch (error) {

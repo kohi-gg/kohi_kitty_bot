@@ -19,7 +19,7 @@ Kohi Kitty Bot is a Discord bot designed specifically for the KOHI Guild, a Guil
 1. **Clone the repository:** `git clone https://github.com/your-username/kohi-kitty-bot.git`
 2. **Install dependencies:** `npm install`
 3. **Configure the bot:**
-    * Create a `config.js` file based on the `config.js.example` file.
+    * Create an `.env` file based on the `.env.example` file.
     * Fill in the required information, including your Discord bot token and Guild Wars 2 API key.
 4. **Run the bot:** `node index.js`
 

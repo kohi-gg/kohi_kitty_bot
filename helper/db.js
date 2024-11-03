@@ -13,48 +13,14 @@ const pool = new Client({
   },
 });
 
-let isConnected = false; // Flag to track connection status
-
-async function connectToDB() {
+(async () => {
   try {
     await pool.connect();
-    isConnected = true;
     console.log('Connected to Avien PostgreSQL!');
   } catch (error) {
-    isConnected = false;
     console.error('Error connecting to Avien PostgreSQL:', error);
-    // Retry connection after a delay (e.g., 5 seconds)
-    setTimeout(connectToDB, 5000); 
+    process.exit(1); // Exit the process if the database connection fails
   }
-}
-
-connectToDB(); // Initial connection attempt
-
-// Disconnect after 5 minutes of inactivity
-let timeoutId;
-
-function resetIdleTimeout() {
-  clearTimeout(timeoutId);
-  timeoutId = setTimeout(async () => {
-    try {
-      await pool.end();
-      isConnected = false;
-      console.log('Disconnected from Avien PostgreSQL due to inactivity.');
-    } catch (error) {
-      console.error('Error disconnecting from Avien PostgreSQL:', error);
-    }
-  }, 5 * 60 * 1000); // 5 minutes in milliseconds
-}
-
-// Reset the timeout on any database activity
-pool.on('query', () => {
-  resetIdleTimeout();
-  if (!isConnected) { 
-    connectToDB(); // Reconnect if not connected
-  }
-});
-
-// Initial timeout setup
-resetIdleTimeout();
+})();
 
 module.exports = pool;

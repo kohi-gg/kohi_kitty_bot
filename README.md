@@ -1,10 +1,10 @@
 # Kohi Kitty Bot 🐾
 
-Kohi Kitty Bot is a Discord bot designed specifically for the KOHI Guild, a Guild Wars 2 guild. This friendly feline bot is here to help with various tasks, making your guild life easier and more enjoyable.
+Kohi Kitty Bot is a Discord bot designed specifically for the KOHI Guild, a Guild Wars 2 guild. This friendly feline bot is here to help with various tasks, making the guild members' life easier and more enjoyable.
 
 ## Features
 
-* **WvW Team Role Assignment:**  Kohi Kitty Bot can automatically assign WvW team roles to your Discord members. Provide the bot with your GW2 API key, and it will fetch your team information and assign the corresponding role.
+* **WvW Team Role Assignment:**  Kohi Kitty Bot can automatically assign WvW team roles to your guild members. Provide the bot with your GW2 API key, and it will fetch your team information and assign the corresponding role.
 
 ## Planned Features
 

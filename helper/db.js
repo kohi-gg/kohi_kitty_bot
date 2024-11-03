@@ -1,5 +1,4 @@
 const { Client } = require('pg');
-const fs = require('fs');
 require('dotenv').config({ path: './.env' });
 
 const pool = new Client({
@@ -14,19 +13,24 @@ const pool = new Client({
   },
 });
 
-(async () => {
+let isConnected = false; // Flag to track connection status
+
+async function connectToDB() {
   try {
     await pool.connect();
+    isConnected = true;
     console.log('Connected to Avien PostgreSQL!');
-
   } catch (error) {
+    isConnected = false;
     console.error('Error connecting to Avien PostgreSQL:', error);
-    process.exit(1); // Exit the process if the database connection fails
+    // Retry connection after a delay (e.g., 5 seconds)
+    setTimeout(connectToDB, 5000); 
   }
-})();
+}
 
+connectToDB(); // Initial connection attempt
 
-// Disconnect after 10 minutes of inactivity
+// Disconnect after 5 minutes of inactivity
 let timeoutId;
 
 function resetIdleTimeout() {
@@ -34,6 +38,7 @@ function resetIdleTimeout() {
   timeoutId = setTimeout(async () => {
     try {
       await pool.end();
+      isConnected = false;
       console.log('Disconnected from Avien PostgreSQL due to inactivity.');
     } catch (error) {
       console.error('Error disconnecting from Avien PostgreSQL:', error);
@@ -42,10 +47,14 @@ function resetIdleTimeout() {
 }
 
 // Reset the timeout on any database activity
-pool.on('query', resetIdleTimeout);
+pool.on('query', () => {
+  resetIdleTimeout();
+  if (!isConnected) { 
+    connectToDB(); // Reconnect if not connected
+  }
+});
 
 // Initial timeout setup
 resetIdleTimeout();
-
 
 module.exports = pool;

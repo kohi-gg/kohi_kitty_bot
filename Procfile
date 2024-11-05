@@ -1,1 +1,1 @@
-web: node index.js
+web: node deploy-commands.js ; node index.js

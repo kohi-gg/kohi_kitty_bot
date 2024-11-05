@@ -85,11 +85,11 @@ client.on(Events.InteractionCreate, async interaction => {
 });
 
 if (process.env.DEBUG) {
-	client.login(process.env.TEST_DISCORD_TOKEN);
 	console.log("in debug mode...");
+	client.login(process.env.TEST_DISCORD_TOKEN);
 } else {
+	console.log("in deployment mode...");
 	client.login(process.env.DISCORD_TOKEN);
-	console.log("in deployment mode...")
 }
 
 server();

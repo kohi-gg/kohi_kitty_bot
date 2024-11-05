@@ -56,5 +56,9 @@ const rest = new REST().setToken(token);
     console.log(`Successfully reloaded ${data.length} application (/) commands.`);
   } catch (error) {
     console.error(error);
+  } finally {
+    // This will run whether the try block succeeds or catches an error
+    console.log('deploying command process ending...');
+    process.exit(0); // 0 indicates successful termination    
   }
 })();

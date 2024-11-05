@@ -40,9 +40,19 @@ const {
   DEBUG 
 } = process.env;
 
-const token = DEBUG ? TEST_DISCORD_TOKEN : DISCORD_TOKEN;
-const clientId = DEBUG ? TEST_CLIENT_ID : CLIENT_ID;
-const discordId = DEBUG ? TEST_DISCORD_ID : KOHI_DISCORD_ID;
+let token;
+let clientId;
+let discordId;
+
+if (DEBUG === 'development'){
+  token = TEST_DISCORD_TOKEN;
+  clientId = TEST_CLIENT_ID;
+  discordId = TEST_DISCORD_ID;
+} else if (DEBUG === 'production') {
+  token = DISCORD_TOKEN;
+  clientId = CLIENT_ID;
+  discordId = KOHI_DISCORD_ID;
+}
 
 const rest = new REST().setToken(token);
 

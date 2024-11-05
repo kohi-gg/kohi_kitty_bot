@@ -80,6 +80,7 @@ if (process.env.DEBUG) {
 	console.log("in debug mode...");
 } else {
 	client.login(process.env.DISCORD_TOKEN);
+	console.log("in deployment mode...")
 }
 
 server();

@@ -28,14 +28,20 @@ module.exports = {
       // Validate API key with required scopes
       await validateApiKey(apiKey); 
 
-      // Store the API key if validation succeeds
-      await storeApiKey(discordUserId, apiKey);
+      const teamIdResponse = await axios.get('https://api.guildwars2.com/v2/account/wvw', {
+        headers: { Authorization: `Bearer ${apiKey}` }
+      });
+
+      const teamId = teamIdResponse.data.team;
 
       // Fetch account name for the success message
       const response = await axios.get('https://api.guildwars2.com/v2/account', {
         headers: { Authorization: `Bearer ${apiKey}` }
       });
       await interaction.editReply({ content: `API key set for ${response.data.name} successfully! 😺` });
+
+      // Store the API key if validation succeeds
+      await storeApiKey(discordUserId, apiKey, teamId, response.data.name);
 
     } catch (error) {
       console.error('Error validating API key:', error);

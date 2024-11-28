@@ -2,6 +2,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { Client, Collection, Events, GatewayIntentBits, ActivityType } = require('discord.js');
 require('dotenv').config({ path: './.env' });
+const updateTeamId = require('./helper/updateTeamId');
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
@@ -27,6 +28,8 @@ for (const folder of commandFolders) {
 	}
 }
 
+
+
 client.once(Events.ClientReady, c => {
 	console.log(`Ready! Logged in as ${c.user.tag}`);
 	
@@ -38,6 +41,9 @@ client.once(Events.ClientReady, c => {
 		}], 
 		status: 'online' 
 	});
+
+ 	// Initialize the cron job here
+	updateTeamId(client);
 });
 
 client.on(Events.InteractionCreate, async interaction => {

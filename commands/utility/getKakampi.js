@@ -1,7 +1,7 @@
 const { SlashCommandBuilder } = require('discord.js');
 const pool = require('../../helper/db');
 const { wvwTeam } = require('../../helper/wvwTeam');
-const { getGuild} = require('../../helper/getGuild');
+const { getGuild } = require('../../helper/getGuild');
 
 // hardcoded team names.
 const teamNames = [
@@ -60,7 +60,7 @@ module.exports = {
 
       try {
         const teamName = await wvwTeam(apiKey);
-        const guildId = await getGuild(apiKey)
+        const guildId = await getGuild(apiKey);
         const roleName = teamName;
 
         // Checking if you already set KOHI as your WvW Guild

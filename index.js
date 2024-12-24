@@ -36,7 +36,7 @@ client.once(Events.ClientReady, c => {
 	// Set the presence
 	c.user.setPresence({ 
 		activities: [{ 
-			name: '/kohi-help', 
+			name: 'TESTING TO', 
 			type: ActivityType.Playing 
 		}], 
 		status: 'online' 

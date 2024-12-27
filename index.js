@@ -11,6 +11,10 @@ client.commands = new Collection();
 const foldersPath = path.join(__dirname, 'commands');
 const commandFolders = fs.readdirSync(foldersPath);
 
+
+//MODELS
+const Data = require("./helper/data")
+
 // setting up and run server
 const server = require('./server/server');
 

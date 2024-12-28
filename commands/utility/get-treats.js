@@ -26,7 +26,7 @@ module.exports = {
 
             newData.save().catch(err => console.log(err));
         let balanceEmbed = new EmbedBuilder()
-        .setColor("Random")
+        .setColor("#1bb369")
         .setTitle(`${interaction.user.username}'s Balance`)
         .setURL("https://www.youtube.com/watch?v=vNhs9CSI0Vc/")
         .setDescription(`<:tuna:1320596587373658195>  **${userData.tuna}** `)
@@ -38,7 +38,7 @@ module.exports = {
                 let time = ms(timeout - (Date.now() - userData.daily));
 
                 let balanceEmbed = new EmbedBuilder()
-                .setColor("Random")
+                .setColor("#1bb369")
                 .setTitle(`${interaction.user.username}'s Balance`)
                 .setURL("https://www.youtube.com/watch?v=vNhs9CSI0Vc/")
                 .setDescription(`**You already collected your daily treats! collect again in ${time.hours}H ${time.minutes}m** `)
@@ -49,7 +49,7 @@ module.exports = {
                 userData.daily = Date.now();
                 userData.save().catch(err => console.log(err));
                 let balanceEmbed = new EmbedBuilder()
-                .setColor("Random")
+                .setColor("#1bb369")
                 .setTitle(`${interaction.user.username}'s Balance`)
                 .setURL("https://www.youtube.com/watch?v=vNhs9CSI0Vc/")
                 .setDescription(`<:tuna:1320596587373658195>  **${userData.tuna}** `)

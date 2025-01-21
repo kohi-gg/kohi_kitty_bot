@@ -15,7 +15,7 @@ async function updateWvwData(user, guild) {
         const newTeamId = response.data.team;
 
         const roleName = await wvwTeam(userApiKey);
-        console.log(roleName);
+        //console.log(roleName);
 
         // Find or create the new team role
         let teamRole = guild.roles.cache.find(role => role.name === roleName);

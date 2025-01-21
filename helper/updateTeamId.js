@@ -22,6 +22,7 @@ async function updateTeamId(client) {
             const guild = client.guilds.cache.first();
 
             for (const user of users) {
+                console.log(user);
                 await updateWvwData(user, guild);
             }
 
@@ -36,8 +37,11 @@ async function updateTeamId(client) {
 
 
 module.exports = (client) => {
-    cron.schedule('15 10 * * 6', () => {
+    cron.schedule('*/2 * * * *', () => {
         updateTeamId(client);
     });
 };
 
+//'*/2 * * * *'
+
+//'15 10 * * 6'

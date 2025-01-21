@@ -23,10 +23,9 @@ const pool = new Client({
     process.exit(1); // Exit the process if the database connection fails
   }
 //connect to mongoose
-  await mongoose.connect(process.env.MONGO_URI || '', {
-        useNewUrlParser: true,
-        useUnifiedTopology: true
-      });
+  await mongoose.connect(process.env.MONGO_URI || '');
+  /**The `useNewUrlParser` and `useUnifiedTopology` options were introduced in older versions of the MongoDB Node.js driver to address compatibility issues. 
+   * However, these options are no longer necessary with the newer driver versions (4.0.0 and above). */
   
   if(mongoose.connect){
     console.log('connected to mongoose');

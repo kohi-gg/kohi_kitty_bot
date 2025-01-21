@@ -37,7 +37,7 @@ async function updateTeamId(client) {
 
 
 module.exports = (client) => {
-    cron.schedule('*/2 * * * *', () => {
+    cron.schedule('15 10 * * 6', () => {
         updateTeamId(client);
     });
 };

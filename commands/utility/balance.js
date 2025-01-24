@@ -12,7 +12,23 @@ module.exports = {
     .setDescription('check your balance'),
   async execute(interaction){
     
-        let userData = await Data.findOne({userID: interaction.user.id});
+    let userData = await Data.findOne({userID: interaction.user.id});
+
+   let botChannel = "1171287223279304784";
+    if(interaction.channel.id != '1182574546612666378' && interaction.channel.id != '1159721580964880414')
+      {
+        
+      let MsgEmbed = new EmbedBuilder()
+              .setColor("#1bb369")
+              .setTitle(`--------------------------------`)
+              .setURL("https://www.youtube.com/watch?v=vNhs9CSI0Vc/")
+              .setDescription(`**Sorry, please use <#${botChannel.toString()}> channel.** `)
+              interaction.reply({embeds:[MsgEmbed]});
+              return;
+
+      }
+    
+      console.log(interaction.channel.id);
         if(userData){
           await Data.findOneAndUpdate({userID:interaction.user.id},{name:interaction.user.username}).then(function(){
               Data.findOne({userID:interaction.user.id}).then(function(result){

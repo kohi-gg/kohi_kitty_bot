@@ -1,22 +1,32 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const { Client, Collection, Events, GatewayIntentBits, ActivityType } = require('discord.js');
+const { Client, Collection, Events, GatewayIntentBits, ActivityType, Message ,Partials} = require('discord.js');
+const { Breed, TheCatAPI } = require("@thatapicompany/thecatapi");
 require('dotenv').config({ path: './.env' });
 const updateTeamId = require('./helper/updateTeamId');
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const client = new Client({ intents: [	GatewayIntentBits.Guilds,
+										GatewayIntentBits.GuildMessages,
+										GatewayIntentBits.MessageContent,
+										GatewayIntentBits.GuildMessageReactions, // ✅ Required for reactions
+										GatewayIntentBits.GuildMembers // If you want user mentions in embeds
+	],
+	partials: [Partials.Message, Partials.Reaction, Partials.User]
+});
 
 client.cooldowns = new Collection();
 client.commands = new Collection();
 const foldersPath = path.join(__dirname, 'commands');
 const commandFolders = fs.readdirSync(foldersPath);
 
-
 //MODELS
 const Data = require("./helper/data")
 
 // setting up and run server
 const server = require('./server/server');
+
+
+
 
 for (const folder of commandFolders) {
 	const commandsPath = path.join(foldersPath, folder);
@@ -32,8 +42,6 @@ for (const folder of commandFolders) {
 	}
 }
 
-
-
 client.once(Events.ClientReady, c => {
 	console.log(`Ready! Logged in as ${c.user.tag}`);
 	
@@ -44,11 +52,19 @@ client.once(Events.ClientReady, c => {
 			type: ActivityType.Playing 
 		}], 
 		status: 'online' 
+
 	});
 
+	const startTantrumLoop = require('./events/tantrums');
+	const TANTUM_CHANNEL_ID = '1161806056817709066'; // replace with a real channel ID
+
+	startTantrumLoop(client, TANTUM_CHANNEL_ID);
+
+	
  	// Initialize the cron job here
 	updateTeamId(client);
 });
+
 
 client.on(Events.InteractionCreate, async interaction => {
 	if (!interaction.isChatInputCommand()) return;
@@ -92,6 +108,15 @@ client.on(Events.InteractionCreate, async interaction => {
 			await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
 		}
 	}
+});
+
+client.on('messageReactionRemove', async (reaction, user) => {
+    if (user.bot) return;
+
+    // Make sure everything is fully fetched (partials!)
+    if (reaction.partial) await reaction.fetch();
+    if (reaction.message.partial) await reaction.message.fetch();
+
 });
 
 if (process.env.DEBUG === 'development') {

@@ -43,7 +43,8 @@ function startTantrumLoop(client, channelId) {
 
 		collector.on('end', collected => {
 			if (!collected.size) {
-				channel.send("No one helped me... 😿 insert: https://www.youtube.com/watch?v=AtPrjYp75uA");
+				channel.send("No one helped me... 😿");
+				channel.send("https://tenor.com/view/sad-sad-white-cat-sadcat-sad-cat-white-cat-gif-10685945192669892930");
 				isTantrumActive = false;
 			}
 			setTimeout(triggerTantrum, getRandomInterval());

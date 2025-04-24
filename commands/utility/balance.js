@@ -15,7 +15,7 @@ module.exports = {
     let userData = await Data.findOne({userID: interaction.user.id});
 
    let botChannel = "1171287223279304784";
-    if(interaction.channel.id != '1182574546612666378' && interaction.channel.id != '1159721580964880414')
+    if(interaction.channel.id != '1171287223279304784')
       {
         
       let MsgEmbed = new EmbedBuilder()

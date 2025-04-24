@@ -83,14 +83,14 @@ module.exports = {
     };
 
     const votes = {
-      [`tank:${emojiIds.tank}`]: new Set(),
-      [`boon:${emojiIds.boon}`]: new Set(),
+      [`heart:${emojiIds.tank}`]: new Set(),
+      [`alacrity:${emojiIds.boon}`]: new Set(),
       [`dps:${emojiIds.dps}`]: new Set()
     };
 
     const maxSlots = {
-      [`tank:${emojiIds.tank}`]: 2,
-      [`boon:${emojiIds.boon}`]: 2,
+      [`heart:${emojiIds.tank}`]: 2,
+      [`alacrity:${emojiIds.boon}`]: 2,
       [`dps:${emojiIds.dps}`]: 6
     };
 
@@ -118,8 +118,8 @@ module.exports = {
     const message = await contentChannel.send({ embeds: [embed] });
 
     await Promise.all([
-      message.react(`<:tank:${emojiIds.tank}>`),
-      message.react(`<:boon:${emojiIds.boon}>`),
+      message.react(`<:heart:${emojiIds.tank}>`),
+      message.react(`<:alacrity:${emojiIds.boon}>`),
       message.react(`<:dps:${emojiIds.dps}>`)
     ]);
 
@@ -129,13 +129,13 @@ module.exports = {
         .setTitle(`**${title}** 📅 ${timeRange} | ⏱️ ${status}`)
         .spliceFields(1, 3,
           {
-            name: 'Tank/Heal (<:tank:1146979167330644019>)',
-            value: `${votes[`tank:${emojiIds.tank}`].size}/${maxSlots[`tank:${emojiIds.tank}`]}\n${[...votes[`tank:${emojiIds.tank}`]].map(u => `<@${u.id}>`).join('\n') || 'None'}`,
+            name: 'Tank/Heal (<:heart:1146979167330644019>)',
+            value: `${votes[`heart:${emojiIds.tank}`].size}/${maxSlots[`heart:${emojiIds.tank}`]}\n${[...votes[`heart:${emojiIds.tank}`]].map(u => `<@${u.id}>`).join('\n') || 'None'}`,
             inline: true
           },
           {
-            name: 'BoonDPS (<:boon:1149886586369085510>)',
-            value: `${votes[`boon:${emojiIds.boon}`].size}/${maxSlots[`boon:${emojiIds.boon}`]}\n${[...votes[`boon:${emojiIds.boon}`]].map(u => `<@${u.id}>`).join('\n') || 'None'}`,
+            name: 'BoonDPS (<:alacrity:1149886586369085510>)',
+            value: `${votes[`alacrity:${emojiIds.boon}`].size}/${maxSlots[`alacrity:${emojiIds.boon}`]}\n${[...votes[`alacrity:${emojiIds.boon}`]].map(u => `<@${u.id}>`).join('\n') || 'None'}`,
             inline: true
           },
           {

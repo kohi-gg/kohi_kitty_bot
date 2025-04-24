@@ -89,10 +89,16 @@ module.exports = {
     await contentChannel.send({ content: `${mentionRole}` });
     const message = await contentChannel.send({ embeds: [embed] });
 
-    const votes = { '<:heart:1146979167330644019>': new Set(), '<:alacrity:1149886586369085510> ': new Set(), '<:dps:1149886591922352219>': new Set() };
-    const maxSlots = { '<:heart:1146979167330644019>': 2, '<:alacrity:1149886586369085510> ': 2, '<:dps:1149886591922352219>': 6 };
-    const latecomers = new Set();
-    const maxLateComers = 5;
+    const votes = { 
+      '<:heart:1146979167330644019>': new Set(), 
+      '<:alacrity:1149886586369085510> ': new Set(), 
+      '<:dps:1149886591922352219>': new Set() 
+    };
+    const maxSlots = { 
+      '<:heart:1146979167330644019>': 2, 
+      '<:alacrity:1149886586369085510> ': 2, 
+      '<:dps:1149886591922352219>': 6 
+    };
 
     for (const emoji of Object.keys(votes)) await message.react(emoji);
 
@@ -117,21 +123,17 @@ module.exports = {
     collector.on('collect', async (reaction, user) => {
       const emoji = reaction.emoji.identifier; // Use the identifier for custom emojis
       if (!votes[emoji]) return reaction.users.remove(user.id); // Only proceed if the emoji is valid
-    
+
       if (status === 'In Progress') {
         await reaction.users.remove(user.id);
-        if (latecomers.size >= maxLateComers) {
-          return user.send(`⚠️ The event **${title}** is already in progress and the latecomer list is full. Sorry!`).catch(() => {});
-        }
-        latecomers.add(user);
         return user.send(`⚠️ The event **${title}** is already in progress. Your reaction won’t count.`).catch(() => {});
       }
-    
+
       if (votes[emoji].size >= maxSlots[emoji]) {
         await reaction.users.remove(user.id);
         return user.send(`Sorry! The role for **${emoji}** is already full.`).catch(() => {});
       }
-    
+
       // Remove any previous reactions from the user in other categories
       for (const e of Object.keys(votes)) {
         if (e !== emoji && votes[e].has(user)) {
@@ -140,22 +142,22 @@ module.exports = {
           if (react) await react.users.remove(user.id);
         }
       }
-    
+
       // Add the user to the new role
       votes[emoji].add(user);
       await updateEmbed();
     });
-    
+
     collector.on('remove', async (reaction, user) => {
-      const emoji = reaction.emoji.identifier; // Use the identifier for custom emojis
+      const emoji = reaction.emoji.identifier;
       if (votes[emoji]) {
         votes[emoji].delete(user);
         await updateEmbed();
       }
     });
-    
 
-    await contentChannel.threads.create({
+    // Create the event discussion thread after the message is sent
+    const thread = await contentChannel.threads.create({
       name: `${title}  📅 ${date} | ⏱️ ${formattedStartTime} | ${status}`,
       autoArchiveDuration: ThreadAutoArchiveDuration.OneHour,
       reason: 'Content discussion thread'

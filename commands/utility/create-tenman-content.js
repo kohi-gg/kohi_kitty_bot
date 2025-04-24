@@ -104,7 +104,7 @@ module.exports = {
         .setColor(statusColors[status])
         .setTitle(`**${title}** 📅 ${timeRange} | ⏱️ ${status}`)
         .setURL('https://www.youtube.com/watch?v=y0sF5xhGreA')
-        .setDescription(`<:catmander_cyan:1160045420324597782> <@${interaction.user.id}> — ***Use the thread below to discuss.***`)
+        .setDescription(`<:catmander_cyan:1160045420324597782> <@${interaction.user.id}> use **/sqjoin /join + hostname/commander** to join —  \n Use the thread below to discuss.`)
         .addFields({ name: 'Event Time (Local)', value: startTimestamp }, ...fields)
         .setFooter({ text: 'All times shown in your local timezone. Powered by KOHI' });
     };

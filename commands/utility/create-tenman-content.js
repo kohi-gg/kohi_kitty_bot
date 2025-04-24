@@ -94,7 +94,7 @@ module.exports = {
       [`dps:${emojiIds.dps}`]: 6
     };
 
-    const contentChannel = await interaction.guild.channels.fetch('1337966311602389034');
+    const contentChannel = await interaction.guild.channels.fetch('1364930867591516250');
     if (!contentChannel || contentChannel.type !== ChannelType.GuildText) {
       return interaction.editReply({ content: '❌ Cannot access the content channel or it is not a text channel.' });
     }

@@ -115,9 +115,9 @@ module.exports = {
     });
 
     collector.on('collect', async (reaction, user) => {
-      const emoji = reaction.emoji.identifier;
-      if (!votes[emoji]) return reaction.users.remove(user.id);
-
+      const emoji = reaction.emoji.identifier; // Use the identifier for custom emojis
+      if (!votes[emoji]) return reaction.users.remove(user.id); // Only proceed if the emoji is valid
+    
       if (status === 'In Progress') {
         await reaction.users.remove(user.id);
         if (latecomers.size >= maxLateComers) {
@@ -126,12 +126,13 @@ module.exports = {
         latecomers.add(user);
         return user.send(`⚠️ The event **${title}** is already in progress. Your reaction won’t count, but you’re marked as a latecomer.`).catch(() => {});
       }
-
+    
       if (votes[emoji].size >= maxSlots[emoji]) {
         await reaction.users.remove(user.id);
         return user.send(`Sorry! The role for **${emoji}** is already full.`).catch(() => {});
       }
-
+    
+      // Remove any previous reactions from the user in other categories
       for (const e of Object.keys(votes)) {
         if (e !== emoji && votes[e].has(user)) {
           votes[e].delete(user);
@@ -139,18 +140,20 @@ module.exports = {
           if (react) await react.users.remove(user.id);
         }
       }
-
+    
+      // Add the user to the new role
       votes[emoji].add(user);
       await updateEmbed();
     });
-
+    
     collector.on('remove', async (reaction, user) => {
-      const emoji = reaction.emoji.identifier;
+      const emoji = reaction.emoji.identifier; // Use the identifier for custom emojis
       if (votes[emoji]) {
         votes[emoji].delete(user);
         await updateEmbed();
       }
     });
+    
 
     await contentChannel.threads.create({
       name: `${title}  📅 ${date} | ⏱️ ${formattedStartTime} | ${status}`,

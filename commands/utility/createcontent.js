@@ -115,7 +115,7 @@ module.exports = {
     });
 
     collector.on('collect', async (reaction, user) => {
-      const emoji = rreaction.emoji.identifier;
+      const emoji = reaction.emoji.identifier;
       if (!votes[emoji]) return reaction.users.remove(user.id);
 
       if (status === 'In Progress') {
@@ -145,7 +145,7 @@ module.exports = {
     });
 
     collector.on('remove', async (reaction, user) => {
-      const emoji = rreaction.emoji.identifier;
+      const emoji = reaction.emoji.identifier;
       if (votes[emoji]) {
         votes[emoji].delete(user);
         await updateEmbed();

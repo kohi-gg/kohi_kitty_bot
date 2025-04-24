@@ -106,7 +106,7 @@ module.exports = {
       .setColor(statusColors[status])
       .setTitle(`**${title}** 📅 ${timeRange} | ⏱️ ${status}`)
       .setURL('https://www.youtube.com/watch?v=y0sF5xhGreA')
-      .setDescription(`By <@${interaction.user.id}> — ***Use the thread below to discuss.***`)
+      .setDescription(`<:catmander_cyan:1160045420324597782> <@${interaction.user.id}> — ***Use the thread below to discuss.***`)
       .addFields(
         { name: 'Event Time (Local)', value: startTimestamp },
         { name: 'Tank/Heal (<:heart:1146979167330644019>)', value: '0/2\nNone', inline: true },
@@ -129,12 +129,12 @@ module.exports = {
         .setTitle(`**${title}** 📅 ${timeRange} | ⏱️ ${status}`)
         .spliceFields(1, 3,
           {
-            name: 'Tank (<:tank:1146979167330644019>)',
+            name: 'Tank/Heal (<:tank:1146979167330644019>)',
             value: `${votes[`tank:${emojiIds.tank}`].size}/${maxSlots[`tank:${emojiIds.tank}`]}\n${[...votes[`tank:${emojiIds.tank}`]].map(u => `<@${u.id}>`).join('\n') || 'None'}`,
             inline: true
           },
           {
-            name: 'Boon (<:boon:1149886586369085510>)',
+            name: 'BoonDPS (<:boon:1149886586369085510>)',
             value: `${votes[`boon:${emojiIds.boon}`].size}/${maxSlots[`boon:${emojiIds.boon}`]}\n${[...votes[`boon:${emojiIds.boon}`]].map(u => `<@${u.id}>`).join('\n') || 'None'}`,
             inline: true
           },
@@ -159,7 +159,7 @@ module.exports = {
 
       if (status !== 'Scheduled') {
         await reaction.users.remove(user.id);
-        return user.send(`⚠️ The event **${title}** has already started. Your reaction won’t count.`).catch(() => {});
+        return user.send(`⚠️ The event **${title}** has already started. Your reaction won't count.`).catch(() => {});
       }
 
       if (votes[emoji].size >= maxSlots[emoji]) {

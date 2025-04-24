@@ -19,7 +19,7 @@ module.exports = {
         .setRequired(true)
         .addChoices(
           { name: 'Raid', value: 'raid' },
-          { name: 'Stikes', value: 'strikes' }
+          { name: 'Strikes', value: 'strikes' }
         ))
     .addStringOption(option =>
       option.setName('event-date')
@@ -45,23 +45,19 @@ module.exports = {
 
     const startTime = new Date(`${date}T${time}:00`);
     const endTime = new Date(startTime.getTime() + duration * 60000);
+    const now = Date.now();
 
     if (isNaN(startTime)) {
       return interaction.editReply({ content: '❌ Invalid date or time format. Use YYYY-MM-DD and HH:MM (24hr).' });
     }
 
-    if (startTime <= Date.now()) {
+    if (startTime <= now) {
       return interaction.editReply({ content: '⚠️ The event time must be in the future.' });
     }
 
-    const to12h = date => date.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true,
-    });
-
     const startTimestamp = `<t:${Math.floor(startTime / 1000)}:F>`;
     const timeRange = `<t:${Math.floor(startTime / 1000)}:t> – <t:${Math.floor(endTime / 1000)}:t>`;
+    const to12h = date => date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
     const formattedStartTime = to12h(startTime);
 
     let status = 'Scheduled';
@@ -74,7 +70,15 @@ module.exports = {
     const emojiIds = {
       tank: '1146979167330644019',
       boon: '1149886586369085510',
-      dps: '1149886591922352219'
+      dps: '1149886591922352219',
+      fill: '782478971471265804' // Add your actual emoji ID for "Fills"
+    };
+
+    const roles = {
+      [`heart:${emojiIds.tank}`]: { name: 'Tank/Heal', emoji: `<:heart:${emojiIds.tank}>`, max: 2, votes: new Set() },
+      [`alacrity:${emojiIds.boon}`]: { name: 'BoonDPS', emoji: `<:alacrity:${emojiIds.boon}>`, max: 2, votes: new Set() },
+      [`dps:${emojiIds.dps}`]: { name: 'DPS', emoji: `<:dps:${emojiIds.dps}>`, max: 6, votes: new Set() },
+      [`uwu:${emojiIds.fill}`]: { name: 'Fills', emoji: `<:uwu:${emojiIds.fill}>`, max: 5, votes: new Set() }
     };
 
     const roleMentions = {
@@ -82,107 +86,75 @@ module.exports = {
       strikes: '1149898797921611887'
     };
 
-    const votes = {
-      [`heart:${emojiIds.tank}`]: new Set(),
-      [`alacrity:${emojiIds.boon}`]: new Set(),
-      [`dps:${emojiIds.dps}`]: new Set()
-    };
-
-    const maxSlots = {
-      [`heart:${emojiIds.tank}`]: 2,
-      [`alacrity:${emojiIds.boon}`]: 2,
-      [`dps:${emojiIds.dps}`]: 6
-    };
-
     const contentChannel = await interaction.guild.channels.fetch('1364930867591516250');
     if (!contentChannel || contentChannel.type !== ChannelType.GuildText) {
       return interaction.editReply({ content: '❌ Cannot access the content channel or it is not a text channel.' });
     }
 
-    const roleToMention = roleMentions[selection];
-    await contentChannel.send(`<@&${roleToMention}>`);
+    await contentChannel.send(`<@&${roleMentions[selection]}>`);
 
-    const embed = new EmbedBuilder()
-      .setColor(statusColors[status])
-      .setTitle(`**${title}** 📅 ${timeRange} | ⏱️ ${status}`)
-      .setURL('https://www.youtube.com/watch?v=y0sF5xhGreA')
-      .setDescription(`<:catmander_cyan:1160045420324597782> <@${interaction.user.id}> — ***Use the thread below to discuss.***`)
-      .addFields(
-        { name: 'Event Time (Local)', value: startTimestamp },
-        { name: 'Tank/Heal (<:heart:1146979167330644019>)', value: '0/2\nNone', inline: true },
-        { name: 'BoonDPS (<:alacrity:1149886586369085510>)', value: '0/2\nNone', inline: true },
-        { name: 'DPS (<:dps:1149886591922352219>)', value: '0/6\nNone', inline: true }
-      )
-      .setFooter({ text: 'All times shown in your local timezone. Powered by KOHI' });
+    const buildEmbed = () => {
+      const fields = Object.entries(roles).map(([_, role]) => ({
+        name: `${role.name} (${role.emoji})`,
+        value: `${role.votes.size}/${role.max}\n${[...role.votes].map(u => `<@${u.id}>`).join('\n') || 'None'}`,
+        inline: true
+      }));
 
-    const message = await contentChannel.send({ embeds: [embed] });
-
-    await Promise.all([
-      message.react(`<:heart:${emojiIds.tank}>`),
-      message.react(`<:alacrity:${emojiIds.boon}>`),
-      message.react(`<:dps:${emojiIds.dps}>`)
-    ]);
-
-    const updateEmbed = async () => {
-      const updated = EmbedBuilder.from(message.embeds[0])
+      return new EmbedBuilder()
         .setColor(statusColors[status])
         .setTitle(`**${title}** 📅 ${timeRange} | ⏱️ ${status}`)
-        .spliceFields(1, 3,
-          {
-            name: 'Tank/Heal (<:heart:1146979167330644019>)',
-            value: `${votes[`heart:${emojiIds.tank}`].size}/${maxSlots[`heart:${emojiIds.tank}`]}\n${[...votes[`heart:${emojiIds.tank}`]].map(u => `<@${u.id}>`).join('\n') || 'None'}`,
-            inline: true
-          },
-          {
-            name: 'BoonDPS (<:alacrity:1149886586369085510>)',
-            value: `${votes[`alacrity:${emojiIds.boon}`].size}/${maxSlots[`alacrity:${emojiIds.boon}`]}\n${[...votes[`alacrity:${emojiIds.boon}`]].map(u => `<@${u.id}>`).join('\n') || 'None'}`,
-            inline: true
-          },
-          {
-            name: 'dps (<:dps:1149886591922352219>)',
-            value: `${votes[`dps:${emojiIds.dps}`].size}/${maxSlots[`dps:${emojiIds.dps}`]}\n${[...votes[`dps:${emojiIds.dps}`]].map(u => `<@${u.id}>`).join('\n') || 'None'}`,
-            inline: true
-          }
-        );
-      await message.edit({ embeds: [updated] });
+        .setURL('https://www.youtube.com/watch?v=y0sF5xhGreA')
+        .setDescription(`<:catmander_cyan:1160045420324597782> <@${interaction.user.id}> — ***Use the thread below to discuss.***`)
+        .addFields({ name: 'Event Time (Local)', value: startTimestamp }, ...fields)
+        .setFooter({ text: 'All times shown in your local timezone. Powered by KOHI' });
+    };
+
+    const message = await contentChannel.send({ embeds: [buildEmbed()] });
+
+    for (const key of Object.keys(roles)) {
+      await message.react(roles[key].emoji).catch(() => {});
+    }
+
+    const updateEmbed = async () => {
+      await message.edit({ embeds: [buildEmbed()] });
     };
 
     const collector = message.createReactionCollector({
       filter: (reaction, user) => !user.bot,
-      time: endTime - Date.now(),
+      time: endTime - now,
       dispose: true
     });
 
     collector.on('collect', async (reaction, user) => {
       const emoji = reaction.emoji.identifier;
-      if (!votes[emoji]) return reaction.users.remove(user.id);
-
-      if (status !== 'Scheduled') {
+      const role = roles[emoji];
+      if (!role || status !== 'Scheduled') {
         await reaction.users.remove(user.id);
-        return user.send(`⚠️ The event **${title}** has already started. Your reaction won't count.`).catch(() => {});
+        return user.send(`⚠️ You can't RSVP to **${title}** right now.`).catch(() => {});
       }
 
-      if (votes[emoji].size >= maxSlots[emoji]) {
+      if (role.votes.size >= role.max) {
         await reaction.users.remove(user.id);
-        return user.send(`❌ Sorry! The slot for that role is already full.`).catch(() => {});
+        return user.send(`❌ Sorry! The slot for ${role.name} is full.`).catch(() => {});
       }
 
-      for (const key of Object.keys(votes)) {
-        if (key !== emoji && votes[key].has(user)) {
-          votes[key].delete(user);
-          const otherReaction = message.reactions.cache.find(r => r.emoji.identifier === key);
+      for (const [otherKey, otherRole] of Object.entries(roles)) {
+        if (otherKey !== emoji && otherRole.votes.has(user)) {
+          otherRole.votes.delete(user);
+          const otherReaction = message.reactions.cache.find(r => r.emoji.identifier === otherKey);
           if (otherReaction) await otherReaction.users.remove(user.id);
         }
       }
 
-      votes[emoji].add(user);
+      role.votes.add(user);
       await updateEmbed();
     });
 
     collector.on('remove', async (reaction, user) => {
       const emoji = reaction.emoji.identifier;
-      if (votes[emoji]) {
-        votes[emoji].delete(user);
+      const role = roles[emoji];
+      if (role) {
+        role.votes.delete(user);
         await updateEmbed();
       }
     });
@@ -195,30 +167,34 @@ module.exports = {
 
     await interaction.editReply({ content: '✅ Event created successfully!' });
 
+    // Status transitions
+    const timeUntilStart = startTime - now;
+    const timeUntilEnd = endTime - now;
+
     setTimeout(() => {
       status = 'In Progress';
       updateEmbed();
-    }, startTime - Date.now());
+    }, timeUntilStart);
 
     setTimeout(() => {
       status = 'Ended';
       collector.stop();
       updateEmbed();
       message.reactions.removeAll().catch(() => {});
-    }, endTime - Date.now());
+    }, timeUntilEnd);
 
+    // 5-min reminder
     const reminderTime = startTime.getTime() - 5 * 60 * 1000;
-    if (reminderTime > Date.now()) {
+    if (reminderTime > now) {
       setTimeout(() => {
-        const allUsers = new Set([
-          ...votes[`tank:${emojiIds.tank}`],
-          ...votes[`boon:${emojiIds.boon}`],
-          ...votes[`dps:${emojiIds.dps}`]
-        ]);
+        const allUsers = new Set();
+        for (const role of Object.values(roles)) {
+          role.votes.forEach(user => allUsers.add(user));
+        }
         for (const user of allUsers) {
           user.send(`⏰ Reminder: **${title}** starts in 5 minutes! Get ready!`).catch(() => {});
         }
-      }, reminderTime - Date.now());
+      }, reminderTime - now);
     }
   }
 };

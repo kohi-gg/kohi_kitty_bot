@@ -28,11 +28,7 @@ module.exports = {
     .addIntegerOption(option =>
       option.setName('duration')
         .setDescription('Duration of the event in minutes')
-        .setRequired(true))
-    .addStringOption(option =>
-      option.setName('location')
-        .setDescription('Optional: Where the event will take place (e.g., Discord, in-game instance, etc.)')
-        .setRequired(false)),
+        .setRequired(true)),
 
   async execute(interaction) {
     await interaction.deferReply({ ephemeral: true });
@@ -42,7 +38,6 @@ module.exports = {
     const date = interaction.options.getString('event-date');
     const time = interaction.options.getString('event-time');
     const duration = interaction.options.getInteger('duration');
-    const location = interaction.options.getString('location');
 
     const startTime = new Date(`${date}T${time}:00`);
     const endTime = new Date(startTime.getTime() + duration * 60000);
@@ -78,18 +73,15 @@ module.exports = {
       return interaction.editReply({ content: 'Content channel is not accessible or not a text channel.' });
     }
 
-    const description = [`<:catmander_cyan:1160045420324597782><@${interaction.user.id}>.`];
-    if (location) description.push(`📍 Location: ${location}`);
-
     const embed = new EmbedBuilder()
       .setColor(statusColors[status])
       .setTitle(`**${title}**  📅 ${timeRangeLocal} | ⏱️ ${status}`)
       .setURL('https://www.youtube.com/watch?v=y0sF5xhGreA')
-      .setDescription(description.join('\n'))
+      .setDescription(`<:catmander_cyan:1160045420324597782> <@${interaction.user.id}> ***Use the thread below to discuss.***`)
       .addFields(
         { name: 'Event Time (Local)', value: `${fullStartTimestamp}`, inline: false },
         { name: 'Tank/Boon/Heal (<:heart:1146979167330644019>)', value: 'None', inline: true },
-        { name: 'BOONDPS (<:alacrity:1149886586369085510>)', value: 'None', inline: true },
+        { name: 'BOONDPS (<:alacrity:1149886586369085510> )', value: 'None', inline: true },
         { name: 'DPS (<:dps:1149886591922352219>)', value: 'None', inline: true }
       )
       .setFooter({ text: 'All times shown in your local timezone. Powered by KOHI' });
@@ -97,16 +89,8 @@ module.exports = {
     await contentChannel.send({ content: `${mentionRole}` });
     const message = await contentChannel.send({ embeds: [embed] });
 
-    const votes = {
-      '<:heart:1146979167330644019>': new Set(),
-      '<:alacrity:1149886586369085510>': new Set(),
-      '<:dps:1149886591922352219>': new Set()
-    };
-    const maxSlots = {
-      '<:heart:1146979167330644019>': 2,
-      '<:alacrity:1149886586369085510>': 2,
-      '<:dps:1149886591922352219>': 6
-    };
+    const votes = { '<:heart:1146979167330644019>': new Set(), '<:alacrity:1149886586369085510> ': new Set(), '<:dps:1149886591922352219>': new Set() };
+    const maxSlots = { '<:heart:1146979167330644019>': 2, '<:alacrity:1149886586369085510> ': 2, '<:dps:1149886591922352219>': 6 };
     const latecomers = new Set();
     const maxLateComers = 5;
 
@@ -118,7 +102,7 @@ module.exports = {
         .setColor(statusColors[status])
         .spliceFields(1, 3,
           { name: 'Tank/Boon/Heal (<:heart:1146979167330644019>)', value: votes['<:heart:1146979167330644019>'].size ? [...votes['<:heart:1146979167330644019>']].map(u => `<@${u.id}>`).join('\n') : 'None', inline: true },
-          { name: 'BOONDPS (<:alacrity:1149886586369085510>)', value: votes['<:alacrity:1149886586369085510>'].size ? [...votes['<:alacrity:1149886586369085510>']].map(u => `<@${u.id}>`).join('\n') : 'None', inline: true },
+          { name: 'BOONDPS (<:alacrity:1149886586369085510> )', value: votes['<:alacrity:1149886586369085510> '].size ? [...votes['<:alacrity:1149886586369085510> ']].map(u => `<@${u.id}>`).join('\n') : 'None', inline: true },
           { name: 'DPS (<:dps:1149886591922352219>)', value: votes['<:dps:1149886591922352219>'].size ? [...votes['<:dps:1149886591922352219>']].map(u => `<@${u.id}>`).join('\n') : 'None', inline: true }
         );
       await message.edit({ embeds: [updatedEmbed] });
@@ -131,7 +115,7 @@ module.exports = {
     });
 
     collector.on('collect', async (reaction, user) => {
-      const emoji = reaction.emoji.identifier;
+      const emoji = reaction.emoji.name;
       if (!votes[emoji]) return reaction.users.remove(user.id);
 
       if (status === 'In Progress') {
@@ -140,7 +124,7 @@ module.exports = {
           return user.send(`⚠️ The event **${title}** is already in progress and the latecomer list is full. Sorry!`).catch(() => {});
         }
         latecomers.add(user);
-        return user.send(`⚠️ The event **${title}** is already in progress. Your reaction won’t count.`).catch(() => {});
+        return user.send(`⚠️ The event **${title}** is already in progress. Your reaction won’t count, but you’re marked as a latecomer.`).catch(() => {});
       }
 
       if (votes[emoji].size >= maxSlots[emoji]) {
@@ -161,7 +145,7 @@ module.exports = {
     });
 
     collector.on('remove', async (reaction, user) => {
-      const emoji = reaction.emoji.identifier;
+      const emoji = reaction.emoji.name;
       if (votes[emoji]) {
         votes[emoji].delete(user);
         await updateEmbed();
@@ -185,19 +169,17 @@ module.exports = {
       status = 'Ended';
       collector.stop();
       updateEmbed();
+
+      // Clear reactions after event ends
       message.reactions.removeAll().catch(() => {});
     }, endTime - Date.now());
 
     const reminderTime = startTime.getTime() - 5 * 60 * 1000;
     if (reminderTime > Date.now()) {
       setTimeout(() => {
-        const allUsers = new Set([
-          ...votes['<:heart:1146979167330644019>'],
-          ...votes['<:alacrity:1149886586369085510>'],
-          ...votes['<:dps:1149886591922352219>']
-        ]);
+        const allUsers = new Set([...votes['<:heart:1146979167330644019>'], ...votes['<:alacrity:1149886586369085510> '], ...votes['<:dps:1149886591922352219>']]);
         for (const user of allUsers) {
-          user.send(`⏰ Reminder: **${title}** starts in 5 minutes! Get ready!`).catch(() => {});
+          user.send(`<:alacrity:1149886586369085510>  Reminder: **${title}** starts in 5 minutes! Get ready!`).catch(() => {});
         }
       }, reminderTime - Date.now());
     }

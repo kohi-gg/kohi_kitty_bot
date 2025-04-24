@@ -86,7 +86,7 @@ module.exports = {
       [`dps:${emojiIds.dps}`]: 6
     };
 
-    const contentChannel = await interaction.guild.channels.fetch('1159721580964880414');
+    const contentChannel = await interaction.guild.channels.fetch('1364930867591516250');
     if (!contentChannel || contentChannel.type !== ChannelType.GuildText) {
       return interaction.editReply({ content: 'Content channel is not accessible or not a text channel.' });
     }
@@ -116,7 +116,7 @@ module.exports = {
         .setTitle(`**${title}**  📅 ${timeRangeLocal} | ⏱️ ${status}`)
         .setColor(statusColors[status])
         .spliceFields(1, 3,
-          { name: 'Tank/Boon/Heal (<:heart:1146979167330644019>)', value: votes[`heart:${emojiIds.heart}`].size ? [...votes[`heart:${emojiIds.heart}`]].map(u => `<@${u.id}>`).join('\n') : 'None', inline: true },
+          { name: 'Tank/Heal (<:heart:1146979167330644019>)', value: votes[`heart:${emojiIds.heart}`].size ? [...votes[`heart:${emojiIds.heart}`]].map(u => `<@${u.id}>`).join('\n') : 'None', inline: true },
           { name: 'BOONDPS (<:alacrity:1149886586369085510>)', value: votes[`alacrity:${emojiIds.alacrity}`].size ? [...votes[`alacrity:${emojiIds.alacrity}`]].map(u => `<@${u.id}>`).join('\n') : 'None', inline: true },
           { name: 'DPS (<:dps:1149886591922352219>)', value: votes[`dps:${emojiIds.dps}`].size ? [...votes[`dps:${emojiIds.dps}`]].map(u => `<@${u.id}>`).join('\n') : 'None', inline: true }
         );

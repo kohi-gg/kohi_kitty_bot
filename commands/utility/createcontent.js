@@ -68,6 +68,24 @@ module.exports = {
       'Ended': 0xED4245
     };
 
+    const emojiIds = {
+      heart: '1146979167330644019',
+      alacrity: '1149886586369085510',
+      dps: '1149886591922352219'
+    };
+
+    const votes = {
+      [`heart:${emojiIds.heart}`]: new Set(),
+      [`alacrity:${emojiIds.alacrity}`]: new Set(),
+      [`dps:${emojiIds.dps}`]: new Set()
+    };
+
+    const maxSlots = {
+      [`heart:${emojiIds.heart}`]: 2,
+      [`alacrity:${emojiIds.alacrity}`]: 2,
+      [`dps:${emojiIds.dps}`]: 6
+    };
+
     const contentChannel = await interaction.guild.channels.fetch('1159721580964880414');
     if (!contentChannel || contentChannel.type !== ChannelType.GuildText) {
       return interaction.editReply({ content: 'Content channel is not accessible or not a text channel.' });
@@ -81,7 +99,7 @@ module.exports = {
       .addFields(
         { name: 'Event Time (Local)', value: `${fullStartTimestamp}`, inline: false },
         { name: 'Tank/Boon/Heal (<:heart:1146979167330644019>)', value: 'None', inline: true },
-        { name: 'BOONDPS (<:alacrity:1149886586369085510> )', value: 'None', inline: true },
+        { name: 'BOONDPS (<:alacrity:1149886586369085510>)', value: 'None', inline: true },
         { name: 'DPS (<:dps:1149886591922352219>)', value: 'None', inline: true }
       )
       .setFooter({ text: 'All times shown in your local timezone. Powered by KOHI' });
@@ -89,27 +107,18 @@ module.exports = {
     await contentChannel.send({ content: `${mentionRole}` });
     const message = await contentChannel.send({ embeds: [embed] });
 
-    const votes = { 
-      '<:heart:1146979167330644019>': new Set(), 
-      '<:alacrity:1149886586369085510> ': new Set(), 
-      '<:dps:1149886591922352219>': new Set() 
-    };
-    const maxSlots = { 
-      '<:heart:1146979167330644019>': 2, 
-      '<:alacrity:1149886586369085510> ': 2, 
-      '<:dps:1149886591922352219>': 6 
-    };
-
-    for (const emoji of Object.keys(votes)) await message.react(emoji);
+    await message.react(`<:heart:${emojiIds.heart}>`);
+    await message.react(`<:alacrity:${emojiIds.alacrity}>`);
+    await message.react(`<:dps:${emojiIds.dps}>`);
 
     const updateEmbed = async () => {
       const updatedEmbed = EmbedBuilder.from(message.embeds[0])
         .setTitle(`**${title}**  📅 ${timeRangeLocal} | ⏱️ ${status}`)
         .setColor(statusColors[status])
         .spliceFields(1, 3,
-          { name: 'Tank/Boon/Heal (<:heart:1146979167330644019>)', value: votes['<:heart:1146979167330644019>'].size ? [...votes['<:heart:1146979167330644019>']].map(u => `<@${u.id}>`).join('\n') : 'None', inline: true },
-          { name: 'BOONDPS (<:alacrity:1149886586369085510> )', value: votes['<:alacrity:1149886586369085510> '].size ? [...votes['<:alacrity:1149886586369085510> ']].map(u => `<@${u.id}>`).join('\n') : 'None', inline: true },
-          { name: 'DPS (<:dps:1149886591922352219>)', value: votes['<:dps:1149886591922352219>'].size ? [...votes['<:dps:1149886591922352219>']].map(u => `<@${u.id}>`).join('\n') : 'None', inline: true }
+          { name: 'Tank/Boon/Heal (<:heart:1146979167330644019>)', value: votes[`heart:${emojiIds.heart}`].size ? [...votes[`heart:${emojiIds.heart}`]].map(u => `<@${u.id}>`).join('\n') : 'None', inline: true },
+          { name: 'BOONDPS (<:alacrity:1149886586369085510>)', value: votes[`alacrity:${emojiIds.alacrity}`].size ? [...votes[`alacrity:${emojiIds.alacrity}`]].map(u => `<@${u.id}>`).join('\n') : 'None', inline: true },
+          { name: 'DPS (<:dps:1149886591922352219>)', value: votes[`dps:${emojiIds.dps}`].size ? [...votes[`dps:${emojiIds.dps}`]].map(u => `<@${u.id}>`).join('\n') : 'None', inline: true }
         );
       await message.edit({ embeds: [updatedEmbed] });
     };
@@ -121,8 +130,8 @@ module.exports = {
     });
 
     collector.on('collect', async (reaction, user) => {
-      const emoji = reaction.emoji.identifier; // Use the identifier for custom emojis
-      if (!votes[emoji]) return reaction.users.remove(user.id); // Only proceed if the emoji is valid
+      const emoji = reaction.emoji.identifier;
+      if (!votes[emoji]) return reaction.users.remove(user.id);
 
       if (status === 'In Progress') {
         await reaction.users.remove(user.id);
@@ -134,16 +143,14 @@ module.exports = {
         return user.send(`Sorry! The role for **${emoji}** is already full.`).catch(() => {});
       }
 
-      // Remove any previous reactions from the user in other categories
       for (const e of Object.keys(votes)) {
         if (e !== emoji && votes[e].has(user)) {
           votes[e].delete(user);
-          const react = message.reactions.cache.get(e);
+          const react = message.reactions.cache.find(r => r.emoji.identifier === e);
           if (react) await react.users.remove(user.id);
         }
       }
 
-      // Add the user to the new role
       votes[emoji].add(user);
       await updateEmbed();
     });
@@ -156,8 +163,7 @@ module.exports = {
       }
     });
 
-    // Create the event discussion thread after the message is sent
-    const thread = await contentChannel.threads.create({
+    await contentChannel.threads.create({
       name: `${title}  📅 ${date} | ⏱️ ${formattedStartTime} | ${status}`,
       autoArchiveDuration: ThreadAutoArchiveDuration.OneHour,
       reason: 'Content discussion thread'
@@ -174,17 +180,19 @@ module.exports = {
       status = 'Ended';
       collector.stop();
       updateEmbed();
-
-      // Clear reactions after event ends
       message.reactions.removeAll().catch(() => {});
     }, endTime - Date.now());
 
     const reminderTime = startTime.getTime() - 5 * 60 * 1000;
     if (reminderTime > Date.now()) {
       setTimeout(() => {
-        const allUsers = new Set([...votes['<:heart:1146979167330644019>'], ...votes['<:alacrity:1149886586369085510> '], ...votes['<:dps:1149886591922352219>']]);
+        const allUsers = new Set([
+          ...votes[`heart:${emojiIds.heart}`],
+          ...votes[`alacrity:${emojiIds.alacrity}`],
+          ...votes[`dps:${emojiIds.dps}`]
+        ]);
         for (const user of allUsers) {
-          user.send(`<:alacrity:1149886586369085510>  Reminder: **${title}** starts in 5 minutes! Get ready!`).catch(() => {});
+          user.send(`<:alacrity:${emojiIds.alacrity}>  Reminder: **${title}** starts in 5 minutes! Get ready!`).catch(() => {});
         }
       }, reminderTime - Date.now());
     }

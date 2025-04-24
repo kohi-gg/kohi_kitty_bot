@@ -124,7 +124,7 @@ module.exports = {
           return user.send(`⚠️ The event **${title}** is already in progress and the latecomer list is full. Sorry!`).catch(() => {});
         }
         latecomers.add(user);
-        return user.send(`⚠️ The event **${title}** is already in progress. Your reaction won’t count, but you’re marked as a latecomer.`).catch(() => {});
+        return user.send(`⚠️ The event **${title}** is already in progress. Your reaction won’t count.`).catch(() => {});
       }
     
       if (votes[emoji].size >= maxSlots[emoji]) {

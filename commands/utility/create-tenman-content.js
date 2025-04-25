@@ -43,15 +43,18 @@ module.exports = {
     const time = interaction.options.getString('event-time');
     const duration = interaction.options.getInteger('duration');
 
-    const startTime = new Date(`${date}T${time}:00`);
-    const endTime = new Date(startTime.getTime() + duration * 60000);
-    const now = Date.now();
-
-    if (isNaN(startTime)) {
+    const isValidDate = /^\d{4}-\d{2}-\d{2}$/.test(date);
+    const isValidTime = /^\d{2}:\d{2}$/.test(time);
+    if (!isValidDate || !isValidTime) {
       return interaction.editReply({ content: '❌ Invalid date or time format. Use YYYY-MM-DD and HH:MM (24hr).' });
     }
 
-    if (startTime <= now) {
+    const MS_IN_MIN = 60000;
+    const startTime = new Date(`${date}T${time}:00`);
+    const endTime = new Date(startTime.getTime() + duration * MS_IN_MIN);
+    const now = Date.now();
+
+    if (isNaN(startTime) || startTime <= now) {
       return interaction.editReply({ content: '⚠️ The event time must be in the future.' });
     }
 
@@ -64,14 +67,15 @@ module.exports = {
     const statusColors = {
       'Scheduled': 0x57F287,
       'In Progress': 0xFAA61A,
-      'Ended': 0xED4245
+      'Ended': 0xED4245,
+      'Canceled': 0x808080
     };
 
     const emojiIds = {
       tank: '1146979167330644019',
       boon: '1149886586369085510',
       dps: '1149886591922352219',
-      fill: '782478971471265804' // Add your actual emoji ID for "Fills"
+      fill: '782478971471265804'
     };
 
     const roles = {
@@ -94,18 +98,22 @@ module.exports = {
     await contentChannel.send(`<@&${roleMentions[selection]}>`);
 
     const buildEmbed = () => {
-      const fields = Object.entries(roles).map(([_, role]) => ({
-        name: `${role.name} (${role.emoji})`,
+      const roleFields = Object.values(roles).map(role => ({
+        name: `${role.name} ${role.emoji}`,
         value: `${role.votes.size}/${role.max}\n${[...role.votes].map(u => `<@${u.id}>`).join('\n') || 'None'}`,
         inline: true
       }));
 
       return new EmbedBuilder()
         .setColor(statusColors[status])
-        .setTitle(`**${title}** 📅 ${timeRange} | ⏱️ ${status}`)
+        .setTitle(`**${title}** | ⏱️ ${status}`)
         .setURL('https://www.youtube.com/watch?v=y0sF5xhGreA')
-        .setDescription(`<:catmander_cyan:1160045420324597782> <@${interaction.user.id}> use **/sqjoin /join + hostname/commander** to join —  \n Use the thread below to discuss.`)
-        .addFields({ name: 'Event Time (Local)', value: startTimestamp }, ...fields)
+        .setDescription(`<:catmander_cyan:1160045420324597782><@${interaction.user.id}> use **/sqjoin /join + hostname/commander** to join —  \n Use the thread below to discuss.`)
+        .addFields(
+          { name: 'Event Time (Local)', value: startTimestamp },
+          { name: 'Starts In', value: `<t:${Math.floor(startTime / 1000)}:R>`, inline: true },
+          ...roleFields
+        )
         .setFooter({ text: 'All times shown in your local timezone. Powered by KOHI' });
     };
 
@@ -126,8 +134,8 @@ module.exports = {
     });
 
     collector.on('collect', async (reaction, user) => {
-      const emoji = reaction.emoji.identifier;
-      const role = roles[emoji];
+      const emojiKey = `${reaction.emoji.name}:${reaction.emoji.id}`;
+      const role = roles[emojiKey];
       if (!role || status !== 'Scheduled') {
         await reaction.users.remove(user.id);
         return user.send(`⚠️ You can't RSVP to **${title}** right now.`).catch(() => {});
@@ -139,9 +147,9 @@ module.exports = {
       }
 
       for (const [otherKey, otherRole] of Object.entries(roles)) {
-        if (otherKey !== emoji && otherRole.votes.has(user)) {
+        if (otherKey !== emojiKey && otherRole.votes.has(user)) {
           otherRole.votes.delete(user);
-          const otherReaction = message.reactions.cache.find(r => r.emoji.identifier === otherKey);
+          const otherReaction = message.reactions.cache.find(r => `${r.emoji.name}:${r.emoji.id}` === otherKey);
           if (otherReaction) await otherReaction.users.remove(user.id);
         }
       }
@@ -151,8 +159,8 @@ module.exports = {
     });
 
     collector.on('remove', async (reaction, user) => {
-      const emoji = reaction.emoji.identifier;
-      const role = roles[emoji];
+      const emojiKey = `${reaction.emoji.name}:${reaction.emoji.id}`;
+      const role = roles[emojiKey];
       if (role) {
         role.votes.delete(user);
         await updateEmbed();
@@ -160,7 +168,7 @@ module.exports = {
     });
 
     await contentChannel.threads.create({
-      name: `${title} 📅 ${date} | ⏱️ ${formattedStartTime} | ${status}`,
+      name: `${title.slice(0, 50)} 📅 ${date} | ⏱️ ${formattedStartTime} | ${status}`,
       autoArchiveDuration: ThreadAutoArchiveDuration.OneHour,
       reason: 'Event discussion thread'
     });
@@ -172,29 +180,50 @@ module.exports = {
     const timeUntilEnd = endTime - now;
 
     setTimeout(() => {
-      status = 'In Progress';
-      updateEmbed();
+      if (status !== 'Canceled') { // Only update to "In Progress" if the event isn't canceled
+        status = 'In Progress';
+        updateEmbed();
+      }
     }, timeUntilStart);
 
     setTimeout(() => {
-      status = 'Ended';
-      collector.stop();
-      updateEmbed();
-      message.reactions.removeAll().catch(() => {});
+      if (status !== 'Canceled') { // Only update to "Ended" if the event isn't canceled
+        status = 'Ended';
+        collector.stop();
+        updateEmbed();
+        message.reactions.removeAll().catch(() => {});
+      }
     }, timeUntilEnd);
 
-    // 5-min reminder
-    const reminderTime = startTime.getTime() - 5 * 60 * 1000;
-    if (reminderTime > now) {
+    // Auto-cancel 2 minutes before start if roles aren't filled
+    const cancelTime = startTime.getTime() - 5 * 60 * 1000;
+    if (cancelTime > now) {
       setTimeout(() => {
-        const allUsers = new Set();
+        let allRolesFilled = true;
         for (const role of Object.values(roles)) {
-          role.votes.forEach(user => allUsers.add(user));
+          if (role.votes.size < role.max) {
+            allRolesFilled = false;
+            break;
+          }
         }
-        for (const user of allUsers) {
-          user.send(`⏰ Reminder: **${title}** starts in 5 minutes! Get ready!`).catch(() => {});
+
+        if (!allRolesFilled && status === 'Scheduled') {
+          status = 'Canceled'; // Set status to "Canceled"
+          updateEmbed();
+
+          const allUsers = new Set();
+          for (const role of Object.values(roles)) {
+            role.votes.forEach(user => allUsers.add(user));
+          }
+
+          for (const user of allUsers) {
+            user.send(`❌ The event **${title}** has been canceled due to insufficient roles.`).catch(() => {});
+          }
+
+          collector.stop();
+          message.reactions.removeAll().catch(() => {});
         }
-      }, reminderTime - now);
+      }, cancelTime - now);
     }
   }
 };

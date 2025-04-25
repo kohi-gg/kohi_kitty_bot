@@ -106,9 +106,9 @@ module.exports = {
 
       return new EmbedBuilder()
         .setColor(statusColors[status])
-        .setTitle(`**${title}** | ⏱️ ${status}`)
+        .setTitle(`**${title}** | ${timeRange} |⏱️ ${status}`)
         .setURL('https://www.youtube.com/watch?v=y0sF5xhGreA')
-        .setDescription(`<:catmander_cyan:1160045420324597782><@${interaction.user.id}> use **/sqjoin /join + hostname/commander** to join —  \n Use the thread below to discuss.`)
+        .setDescription(`<:catmander_cyan:1160045420324597782><@${interaction.user.id}> use **/sqjoin /join + hostname/commander** to join —  \n Use the thread below to discussion like special roles etc..`)
         .addFields(
           { name: 'Event Time (Local)', value: startTimestamp },
           { name: 'Starts In', value: `<t:${Math.floor(startTime / 1000)}:R>`, inline: true },
@@ -168,7 +168,7 @@ module.exports = {
     });
 
     await contentChannel.threads.create({
-      name: `${title.slice(0, 50)} 📅 ${date} | ⏱️ ${formattedStartTime} | ${status}`,
+      name: `${title.slice(0, 50)} 📅 ${date} | ⏱️ ${formattedStartTime}`,
       autoArchiveDuration: ThreadAutoArchiveDuration.OneHour,
       reason: 'Event discussion thread'
     });

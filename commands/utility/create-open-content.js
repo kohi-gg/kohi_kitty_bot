@@ -84,7 +84,7 @@ module.exports = {
       openworld: '1178537577003896932'
     };
 
-    const contentChannel = await interaction.guild.channels.fetch('1159721580964880414');
+    const contentChannel = await interaction.guild.channels.fetch('1364930867591516250');
     if (!contentChannel || contentChannel.type !== ChannelType.GuildText) {
       return interaction.editReply({ content: '❌ Cannot access the content channel or it is not a text channel.' });
     }
@@ -100,9 +100,9 @@ module.exports = {
 
       return new EmbedBuilder()
         .setColor(statusColors[status])
-        .setTitle(`**${title}** | ⏱️ ${status}`)
+        .setTitle(`**${title}** | ${timeRange} |⏱️ ${status}`)
         .setURL('https://www.youtube.com/watch?v=y0sF5xhGreA')
-        .setDescription(`<:catmander_cyan:1160045420324597782> <@${interaction.user.id}> — ***Use the thread below to discuss.***`)
+        .setDescription(`<:catmander_cyan:1160045420324597782> <@${interaction.user.id}> — ***Use the thread below to discuss Use the thread below to discuss like special roles etc..***`)
         .addFields(
           { name: 'Event Time (Local)', value: startTimestamp, inline: true },
           { name: 'Starts In', value: `<t:${Math.floor(startTime / 1000)}:R>`, inline: true },
@@ -158,7 +158,7 @@ module.exports = {
     });
 
     await contentChannel.threads.create({
-      name: `${title} 📅 ${date} | ⏱️ ${formattedStartTime} | ${status}`,
+      name: `${title} 📅 ${date} | ⏱️ ${formattedStartTime}`,
       autoArchiveDuration: ThreadAutoArchiveDuration.OneHour,
       reason: 'Event discussion thread'
     });

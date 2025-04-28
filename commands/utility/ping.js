@@ -10,7 +10,7 @@ module.exports = {
         await interaction.deleteReply();
 
         const m = await interaction.channel.send("Ping?");
-    m.edit(`Pong isama ang <:tuna:1320596587373658195> ${m.createdTimestamp - interaction.createdTimestamp}ms`);
+    m.edit(`Pong<:tuna:1320596587373658195> ${m.createdTimestamp - interaction.createdTimestamp}ms`);
     
    
     },

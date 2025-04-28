@@ -2,7 +2,10 @@ const {
   SlashCommandBuilder,
   ChannelType,
   ThreadAutoArchiveDuration,
-  EmbedBuilder
+  EmbedBuilder,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle
 } = require('discord.js');
 
 // Utility functions
@@ -69,7 +72,6 @@ module.exports = {
 
       await interaction.deferReply({ ephemeral: true });
 
-      // Setup
       const formattedStartTime = to12HourTime(startTime);
       const startTimestamp = `<t:${Math.floor(startTime / 1000)}:F>`;
       const timeRange = `<t:${Math.floor(startTime / 1000)}:t> – <t:${Math.floor(endTime / 1000)}:t>`;
@@ -149,7 +151,6 @@ module.exports = {
           return user.send(`⚠️ You can't RSVP to **${title}** right now.`).catch(() => {});
         }
 
-        // Ensure user only in one role
         for (const [key, otherRole] of Object.entries(rsvpRoles)) {
           if (key !== emojiKey && otherRole.votes.has(user.id)) {
             otherRole.votes.delete(user.id);
@@ -183,7 +184,6 @@ module.exports = {
 
       await interaction.editReply({ content: '✅ Event created successfully!' });
 
-      // Status transitions
       const timeUntilStart = startTime.getTime() - now;
       const timeUntilEnd = endTime.getTime() - now;
 
@@ -199,7 +199,6 @@ module.exports = {
         eventMessage.reactions.removeAll().catch(() => {});
       }, timeUntilEnd);
 
-      // Auto-cancel if not enough RSVPs
       const cancelTime = startTime.getTime() - 5 * 60 * 1000;
       if (cancelTime > now) {
         setTimeout(async () => {
@@ -209,14 +208,11 @@ module.exports = {
 
           try {
             const dm = await interaction.user.send({
-              content: `⚠️ Only **${allUserIds.size}** users have signed up for **${eventId} | ${title}**. Continue or cancel?`,
-              components: [{
-                type: 1,
-                components: [
-                  { type: 2, label: '✅ Continue', style: 3, custom_id: 'continue_event' },
-                  { type: 2, label: '❌ Cancel', style: 4, custom_id: 'cancel_event' }
-                ]
-              }]
+              content: `⚠️ Only **${allUserIds.size}** users signed up for **${eventId} | ${title}**. Do you want to continue or cancel?`,
+              components: [new ActionRowBuilder().addComponents(
+                new ButtonBuilder().setCustomId('continue_event').setLabel('✅ Continue').setStyle(ButtonStyle.Success),
+                new ButtonBuilder().setCustomId('cancel_event').setLabel('❌ Cancel').setStyle(ButtonStyle.Danger)
+              )]
             });
 
             const btn = await dm.awaitMessageComponent({ time: 2 * 60 * 1000 }).catch(() => null);
@@ -224,10 +220,10 @@ module.exports = {
             if (!btn) {
               await cancelEvent();
             } else if (btn.customId === 'continue_event') {
-              await btn.reply({ content: '👍 Event will proceed!', ephemeral: true });
+              await btn.update({ content: '👍 Event will proceed!', components: [] });
             } else {
               await cancelEvent();
-              await btn.reply({ content: '❌ Event canceled.', ephemeral: true });
+              await btn.update({ content: '❌ Event canceled.', components: [] });
             }
           } catch (err) {
             console.error('❌ Failed to DM event host:', err);

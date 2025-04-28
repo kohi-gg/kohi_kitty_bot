@@ -5,6 +5,26 @@ const {
   EmbedBuilder
 } = require('discord.js');
 
+// Utility functions
+const isValidDateFormat = date => /^\d{4}-\d{2}-\d{2}$/.test(date);
+const isValidTimeFormat = time => /^\d{2}:\d{2}$/.test(time);
+const to12HourTime = date => date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+
+const getAllSignedUserIds = (roles) => {
+  const ids = new Set();
+  for (const role of Object.values(roles)) {
+    for (const user of role.votes) ids.add(user.id || user); // Handles both user objects and IDs
+  }
+  return ids;
+};
+
+const setStatus = async (newStatus, updateEmbed) => {
+  status = newStatus;
+  await updateEmbed();
+};
+
+const getEmojiKey = (emoji) => `${emoji.name}:${emoji.id}`;
+
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('create-fiveman-content')
@@ -43,9 +63,7 @@ module.exports = {
     const time = interaction.options.getString('event-time');
     const duration = interaction.options.getInteger('duration');
 
-    const isValidDate = /^\d{4}-\d{2}-\d{2}$/.test(date);
-    const isValidTime = /^\d{2}:\d{2}$/.test(time);
-    if (!isValidDate || !isValidTime) {
+    if (!isValidDateFormat(date) || !isValidTimeFormat(time)) {
       return interaction.editReply({ content: '❌ Invalid date or time format. Use YYYY-MM-DD and HH:MM (24hr).' });
     }
 
@@ -60,8 +78,7 @@ module.exports = {
 
     const startTimestamp = `<t:${Math.floor(startTime / 1000)}:F>`;
     const timeRange = `<t:${Math.floor(startTime / 1000)}:t> – <t:${Math.floor(endTime / 1000)}:t>`;
-    const to12h = date => date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-    const formattedStartTime = to12h(startTime);
+    const formattedStartTime = to12HourTime(startTime);
 
     let status = 'Scheduled';
     const statusColors = {
@@ -134,11 +151,11 @@ module.exports = {
     });
 
     collector.on('collect', async (reaction, user) => {
-      const emojiKey = `${reaction.emoji.name}:${reaction.emoji.id}`;
+      const emojiKey = getEmojiKey(reaction.emoji);
       const role = roles[emojiKey];
       if (!role || status !== 'Scheduled') {
         await reaction.users.remove(user.id);
-        return user.send(`⚠️ You can't RSVP to **${title}** right now.`).catch(() => {});
+        return user.send(`⚠️ You can't sign up to **${title}** right now.`).catch(() => {});
       }
 
       if (role.votes.size >= role.max) {
@@ -149,7 +166,7 @@ module.exports = {
       for (const [otherKey, otherRole] of Object.entries(roles)) {
         if (otherKey !== emojiKey && otherRole.votes.has(user)) {
           otherRole.votes.delete(user);
-          const otherReaction = message.reactions.cache.find(r => `${r.emoji.name}:${r.emoji.id}` === otherKey);
+          const otherReaction = message.reactions.cache.find(r => getEmojiKey(r.emoji) === otherKey);
           if (otherReaction) await otherReaction.users.remove(user.id);
         }
       }
@@ -159,7 +176,7 @@ module.exports = {
     });
 
     collector.on('remove', async (reaction, user) => {
-      const emojiKey = `${reaction.emoji.name}:${reaction.emoji.id}`;
+      const emojiKey = getEmojiKey(reaction.emoji);
       const role = roles[emojiKey];
       if (role) {
         role.votes.delete(user);
@@ -167,63 +184,121 @@ module.exports = {
       }
     });
 
-    await contentChannel.threads.create({
-      name: `${title.slice(0, 50)} 📅 ${date} | ⏱️ ${formattedStartTime}`,
+    const shortId = Math.random().toString(36).substring(2, 8).toUpperCase();
+
+    const thread = await contentChannel.threads.create({
+      name: `${shortId} | ${title.slice(0, 50)} 📅 ${date}|⏱️ ${formattedStartTime}`,
       autoArchiveDuration: ThreadAutoArchiveDuration.OneHour,
       reason: 'Event discussion thread'
     });
+    const jumpMsg = await thread.send(`📌 [Event Details - click this to show the event embed](https://discord.com/channels/${interaction.guild.id}/${message.channel.id}/${message.id})`);
+    await jumpMsg.pin().catch(() => {});
 
     await interaction.editReply({ content: '✅ Event created successfully!' });
 
-     // Status transitions
-     const timeUntilStart = startTime - now;
-     const timeUntilEnd = endTime - now;
+    // Status transitions
+    const timeUntilStart = startTime - now;
+    const timeUntilEnd = endTime - now;
 
     setTimeout(() => {
       if (status !== 'Canceled') { // Only update to "In Progress" if the event isn't canceled
-        status = 'In Progress';
-        updateEmbed();
+        setStatus('In Progress', updateEmbed);
       }
     }, timeUntilStart);
 
     setTimeout(() => {
       if (status !== 'Canceled') { // Only update to "Ended" if the event isn't canceled
-        status = 'Ended';
+        setStatus('Ended', updateEmbed);
         collector.stop();
-        updateEmbed();
         message.reactions.removeAll().catch(() => {});
       }
     }, timeUntilEnd);
 
-    // Auto-cancel 2 minutes before start if roles aren't filled
+    // 5-minute reminder
+    const reminderTime = startTime.getTime() - 10 * 60 * 1000;
+    if (reminderTime > now) {
+      setTimeout(() => {
+        const allUserIds = getAllSignedUserIds(roles);
+        for (const userId of allUserIds) {
+          const member = interaction.guild.members.cache.get(userId);
+          if (member) {
+            member.send(`⏰ Reminder: **${shortId} | ${title}** starts in 10 minutes! Get ready!`).catch(() => {});
+          }
+        }
+      }, reminderTime - now);
+    }
+
+    // Auto-cancel 5 minutes before start if fewer than 7 users RSVP
     const cancelTime = startTime.getTime() - 5 * 60 * 1000;
     if (cancelTime > now) {
-      setTimeout(() => {
-        let allRolesFilled = true;
-        for (const role of Object.values(roles)) {
-          if (role.votes.size < role.max) {
-            allRolesFilled = false;
-            break;
-          }
-        }
-
-        if (!allRolesFilled && status === 'Scheduled') {
-          status = 'Canceled'; // Set status to "Canceled"
-          updateEmbed();
-
-          const allUsers = new Set();
-          for (const role of Object.values(roles)) {
-            role.votes.forEach(user => allUsers.add(user));
-          }
-
-          for (const user of allUsers) {
-            user.send(`❌ The event **${title}** has been canceled due to insufficient roles.`).catch(() => {});
-          }
-
-          collector.stop();
-          message.reactions.removeAll().catch(() => {});
+      setTimeout(async () => {
+        const allUserIds = getAllSignedUserIds(roles);
+    
+        if (allUserIds.size >= 7 || status !== 'Scheduled') return; // Enough users or already started
+    
+        // Send DM to event creator
+        try {
+          const dm = await interaction.user.send({
+            content: `⚠️ Only **${allUserIds.size}** users have signed up to **${shortId} | ${title}**. Do you still want to run this event?`,
+            components: [{
+              type: 1,
+              components: [
+                {
+                  type: 2,
+                  label: '✅ Continue Event',
+                  style: 3,
+                  custom_id: 'continue_event'
+                },
+                {
+                  type: 2,
+                  label: '❌ Cancel Event',
+                  style: 4,
+                  custom_id: 'cancel_event'
+                }
+              ]
+            }]
+          });
+    
+          const dmCollector = dm.createMessageComponentCollector({ time: 2 * 60 * 1000, max: 1 });
+    
+          dmCollector.on('collect', async (btn) => {
+            if (btn.customId === 'continue_event') {
+              await btn.reply({ content: '👍 The event will proceed!', ephemeral: true });
+            } else if (btn.customId === 'cancel_event') {
+              await setStatus('Canceled', updateEmbed);
+              await btn.reply({ content: '❌ The event has been canceled.', ephemeral: true });
+    
+              for (const userId of allUserIds) {
+                try {
+                  const user = await interaction.client.users.fetch(userId);
+                  await user.send(`❌ The event **${shortId} | ${title}** has been canceled by the host.`);
+                } catch {}
+              }
+    
+              collector.stop();
+              message.reactions.removeAll().catch(() => {});
+            }
+          });
+    
+          dmCollector.on('end', async collected => {
+            if (collected.size === 0 && status === 'Scheduled') {
+              await setStatus('Canceled', updateEmbed);
+    
+              for (const userId of allUserIds) {
+                try {
+                  const user = await interaction.client.users.fetch(userId);
+                  await user.send(`❌ The event **${shortId} | ${title}** was canceled due to low signups and no host response.`);
+                } catch {}
+              }
+    
+              collector.stop();
+              message.reactions.removeAll().catch(() => {});
+            }
+          });
+        } catch (err) {
+          console.log(`❌ Failed to DM host:`, err);
         }
       }, cancelTime - now);
-    }
+    }    
   }
 };

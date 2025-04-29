@@ -166,6 +166,8 @@ module.exports = {
             time: endTime - now,
             dispose: true
           });
+
+          const mentionedInThread = new Set();
         
           collector.on('collect', async (reaction, user) => {
             const emojiKey = getEmojiKey(reaction.emoji);
@@ -190,6 +192,11 @@ module.exports = {
         
             role.votes.add(user);
             await updateEmbed();
+
+            if (!mentionedInThread.has(user.id)) {
+              mentionedInThread.add(user.id);
+              thread.send(`👋 <@${user.id}> signed up as **${role.name}**!`);
+            }
           });
         
           collector.on('remove', async (reaction, user) => {

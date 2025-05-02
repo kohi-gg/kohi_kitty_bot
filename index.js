@@ -25,8 +25,6 @@ const Data = require("./helper/data")
 // setting up and run server
 const server = require('./server/server');
 
-
-const PEATER = "332501625392594946";
 const IMPOSTOR = "1173207776751800360";
 
 
@@ -127,15 +125,6 @@ client.on('messageReactionRemove', async (reaction, user) => {
 client.on('messageCreate', async message => {
 	// Ignore messages from bots (including itself)
 	if (message.author.bot) return;
-  
-	// Check if the message is from the target user
-	if (message.author.id === PEATER) {
-	  try {
-		await message.react('1190850231663857724'); // Change to any emoji you like
-	  } catch (error) {
-		console.error('Failed to react:', error);
-	  }
-	}
 
 	if (message.author.id === IMPOSTOR){
 		try {

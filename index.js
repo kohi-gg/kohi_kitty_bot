@@ -27,6 +27,7 @@ const server = require('./server/server');
 
 
 const PEATER = "332501625392594946";
+const IMPOSTOR = "1173207776751800360";
 
 
 
@@ -134,6 +135,14 @@ client.on('messageCreate', async message => {
 	  } catch (error) {
 		console.error('Failed to react:', error);
 	  }
+	}
+
+	if (message.author.id === IMPOSTOR){
+		try {
+			await message.reply('IMPOSTOR KAAA!!'); // Your custom reply here
+		  } catch (error) {
+			console.error('Failed to reply:', error);
+		  }
 	}
 });
 

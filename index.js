@@ -26,6 +26,10 @@ const Data = require("./helper/data")
 const server = require('./server/server');
 
 
+const PEATER = "332501625392594946";
+
+
+
 
 
 for (const folder of commandFolders) {
@@ -117,6 +121,20 @@ client.on('messageReactionRemove', async (reaction, user) => {
     if (reaction.partial) await reaction.fetch();
     if (reaction.message.partial) await reaction.message.fetch();
 
+});
+
+client.on('messageCreate', async message => {
+	// Ignore messages from bots (including itself)
+	if (message.author.bot) return;
+  
+	// Check if the message is from the target user
+	if (message.author.id === PEATER) {
+	  try {
+		await message.react('1190850231663857724'); // Change to any emoji you like
+	  } catch (error) {
+		console.error('Failed to react:', error);
+	  }
+	}
 });
 
 if (process.env.DEBUG === 'development') {

@@ -25,12 +25,6 @@ const Data = require("./helper/data")
 // setting up and run server
 const server = require('./server/server');
 
-const IMPOSTOR = "1173207776751800360";
-
-
-
-
-
 for (const folder of commandFolders) {
 	const commandsPath = path.join(foldersPath, folder);
 	const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
@@ -120,19 +114,6 @@ client.on('messageReactionRemove', async (reaction, user) => {
     if (reaction.partial) await reaction.fetch();
     if (reaction.message.partial) await reaction.message.fetch();
 
-});
-
-client.on('messageCreate', async message => {
-	// Ignore messages from bots (including itself)
-	if (message.author.bot) return;
-
-	if (message.author.id === IMPOSTOR){
-		try {
-			await message.reply('IMPOSTOR KAAA!!'); // Your custom reply here
-		  } catch (error) {
-			console.error('Failed to reply:', error);
-		  }
-	}
 });
 
 if (process.env.DEBUG === 'development') {

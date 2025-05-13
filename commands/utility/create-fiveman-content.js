@@ -104,7 +104,7 @@ module.exports = {
             dungeon: '1192031906880049182'
           };
         
-          const contentChannel = await interaction.guild.channels.fetch('1364930867591516250');
+          const contentChannel = await interaction.guild.channels.fetch('1371750538626207754');
           if (!contentChannel || contentChannel.type !== ChannelType.GuildText) {
             return interaction.editReply({ content: '❌ Cannot access the content channel or it is not a text channel.' });
           }

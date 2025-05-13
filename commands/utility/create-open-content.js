@@ -103,7 +103,7 @@ module.exports = {
         openworld: '1178537577003896932'
       };
 
-      const contentChannel = await interaction.guild.channels.fetch('1364930867591516250');
+      const contentChannel = await interaction.guild.channels.fetch('1371750538626207754');
       if (!contentChannel || contentChannel.type !== ChannelType.GuildText) {
         return interaction.editReply({ content: '❌ Could not access the event channel. Contact an admin.' });
       }

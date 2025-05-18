@@ -11,7 +11,7 @@ const tantrumPhrases = [
 let isTantrumActive = false;
 
 function getRandomInterval(minMinutes = 10, maxMinutes = 1440) {
-	const ms = Math.floor(Math.random() * (maxMinutes - minMinutes + 1) + minMinutes) * 60 * 1000;
+	const ms = Math.floor(Math.random() * (maxMinutes - minMinutes + 3) + minMinutes) * 60 * 1000;
 	return ms;
 }
 

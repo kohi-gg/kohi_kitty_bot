@@ -51,11 +51,17 @@ client.once(Events.ClientReady, c => {
 		status: 'online' 
 
 	});
-
+	//tantrum loop
 	const startTantrumLoop = require('./events/tantrums');
 	const TANTUM_CHANNEL_ID = '1161806056817709066'; // replace with a real channel ID
 
 	startTantrumLoop(client, TANTUM_CHANNEL_ID);
+
+	//Daily Advice 8AM PH time
+	const startDailyAdvice = require('./events/dailyAdvice');
+	const ADVICE_CHANNEL_ID = '1161806056817709066'; // cafe channel
+
+	startDailyAdvice(client, ADVICE_CHANNEL_ID);
 
 	
  	// Initialize the cron job here

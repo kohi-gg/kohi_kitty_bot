@@ -6,23 +6,23 @@ const tantrumPhrases = [
 	"MEOWWWWWWWWWWWWWWWWWWWWWWWWWWW!",
 	"MOOOOOOOOOOOOOOOOOOOOOOOOO 🐮",
 	"AWIWIWIWIWIWIWI WIWIWIWIWIWIWI 🤪",
-	"https://tenor.com/view/angry-cat-mad-annoyed-hissy-fit-meow-gif-24700592",
-	"https://tenor.com/view/cat-angry-angry-cat-yelling-shout-gif-26484758",
-	"HUE HUE HUE",
-	"https://tenor.com/view/cat-break-stuff-angry-smash-destroy-gif-22197895",
-	"I'm in a mood and PANGET MO! 🧨",
-	"https://tenor.com/view/cat-mad-angry-gif-24088802"
+	"SINAYAAAAAAAAAAAAA",
+	"https://tenor.com/view/cat-screaming-cat-scream-aaaaaaaah-gif-12740893762543074394",
+	"HUE HUE HUE (┬┬﹏┬┬)",
+	"https://tenor.com/view/fat-cat-laser-eyes-angry-cat-cyclops-nara-gif-5759191940836070229",
+	"I'm in a mood",
+	""
 ];
 
 // 😿 Sad messages and GIFs if no one helps
 const sadMessages = [
 	"https://tenor.com/view/sad-sad-white-cat-sadcat-sad-cat-white-cat-gif-10685945192669892930",
-	"https://tenor.com/view/sad-sad-cat-cry-gif-15794792",
-	"https://tenor.com/view/cry-cat-tears-gif-22423772",
-	"https://tenor.com/view/cat-sad-alone-depressed-gif-22040194",
-	"https://tenor.com/view/sad-sob-sad-cat-cry-cat-cat-gif-22070583",
+	"NO ONE CARES HMP!!!!",
+	"https://tenor.com/view/crying-cat-sad-cat-me-when-i-dont-get-orod-tickets-gif-13399313231964052110",
+	"https://tenor.com/view/cat-crying-crying-cat-sad-cat-tears-gif-8667404633191338902",
+	"https://tenor.com/view/banana-cat-gif-6227991838366394061",
 	"I'm just a little guy... and nobody cares. 😢",
-	"https://tenor.com/view/lonely-cat-gif-24880330"
+	"https://tenor.com/view/bard1a-sad-cat-sad-dark-dark-side-gif-11200514925795091536"
 ];
 
 let isTantrumActive = false;

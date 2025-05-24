@@ -25,6 +25,18 @@ const sadMessages = [
 	"https://tenor.com/view/bard1a-sad-cat-sad-dark-dark-side-gif-11200514925795091536"
 ];
 
+//Thank you messages
+const thankYouMessages = [
+	"Thanks <@{userId}>! I feel better now. 😸",
+	"Aww, you're the best <@{userId}>! 💖",
+	"*purrs* Thank you, <@{userId}>~ 🐾",
+	"<@{userId}> gave me love. Mood: healed. 🥹",
+	"Someone cares! Thank you <@{userId}>! 🐱",
+	"<@{userId}> just saved the day! ✨",
+	"You gave me pets and snacks! I'm so happy! 🍖🖐️"
+];
+
+
 let isTantrumActive = false;
 
 function getRandomInterval(minMinutes = 10, maxMinutes = 1440) {
@@ -59,9 +71,12 @@ function startTantrumLoop(client, channelId) {
 			});
 
 			collector.on('collect', (reaction, user) => {
-				channel.send(`Thanks <@${user.id}>! I feel better now. 😸`).catch(console.error);
-				collector.stop(); // Stop on first valid reaction
+			const msg = thankYouMessages[Math.floor(Math.random() * thankYouMessages.length)]
+			.replace('{userId}', user.id);
+			channel.send(msg).catch(console.error);
+			collector.stop();
 			});
+
 
 			collector.on('end', async (collected) => {
 				if (collected.size === 0) {

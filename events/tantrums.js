@@ -11,7 +11,7 @@ const tantrumPhrases = [
 	"HUE HUE HUE (┬┬﹏┬┬)",
 	"https://tenor.com/view/fat-cat-laser-eyes-angry-cat-cyclops-nara-gif-5759191940836070229",
 	"I'm in a mood",
-	""
+	"hMPFK!!!"
 ];
 
 // 😿 Sad messages and GIFs if no one helps
@@ -39,7 +39,7 @@ const thankYouMessages = [
 
 let isTantrumActive = false;
 
-function getRandomInterval(minMinutes = 10, maxMinutes = 1440) {
+function getRandomInterval(minMinutes = 5, maxMinutes = 360) {
 	const minMs = minMinutes * 60 * 1000;
 	const maxMs = maxMinutes * 60 * 1000;
 	return Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;

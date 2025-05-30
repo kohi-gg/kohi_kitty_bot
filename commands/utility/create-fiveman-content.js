@@ -161,11 +161,13 @@ module.exports = {
             await message.react(roles[key].emoji).catch(() => {});
           }
         
+          const validEmojis = new Set(Object.keys(roles));
+
           const collector = message.createReactionCollector({
-            filter: (reaction, user) => !user.bot,
-            time: endTime - now,
+            filter: (reaction, user) => !user.bot && validEmojis.has(getEmojiKey(reaction.emoji)),
             dispose: true
           });
+
 
           const mentionedInThread = new Set();
         
@@ -227,16 +229,17 @@ module.exports = {
           const timeUntilEnd = endTime - now;
         
           setTimeout(() => {
-            if (eventState.status !== 'Canceled') {
-              setStatus('In Progress', updateEmbed);
-            }
-          }, timeUntilStart);
-        
-          setTimeout(() => {
-            if (eventState.status !== 'Canceled') {
-              setStatus('Ended', updateEmbed, { stopCollector: true, clearReactions: true });
-            }
-          }, timeUntilEnd);
+          if (eventState.status !== 'Canceled') {
+            setStatus('In Progress', updateEmbed);
+          }
+        }, timeUntilStart);
+
+        setTimeout(() => {
+          if (eventState.status !== 'Canceled') {
+            setStatus('Ended', updateEmbed, { stopCollector: true, clearReactions: true });
+          }
+        }, timeUntilEnd);
+
         
           // --- Reminder ---
           const reminderTime = startTime.getTime() - 10 * 60 * 1000;

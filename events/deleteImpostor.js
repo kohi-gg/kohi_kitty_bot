@@ -3,13 +3,11 @@ const targetUserId = '1173207776751800360'; // The ID of the user whose messages
 
 module.exports = {
     name: 'messageCreate', // The name of the event
-    async execute(message, client) { // 'client' might be passed if your handler needs it for other things
-        // Ignore messages from bots or if the message doesn't have an author (e.g., system messages)
+    async execute(message) { // 'client' might be passed if your handler needs it for other things
         if (message.author.bot || !message.author) {
             return;
         }
 
-        // Check if the message author's ID is the one we're targeting
         if (message.author.id === targetUserId) {
             try {
                 if (message.deletable) { // Check if the message can be deleted

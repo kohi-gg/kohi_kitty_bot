@@ -136,11 +136,13 @@ module.exports = {
         await eventMessage.react(role.emoji).catch(console.error);
       }
 
+      const validEmojis = new Set(Object.keys(rsvpRoles));
+
       const collector = eventMessage.createReactionCollector({
-        filter: (reaction, user) => !user.bot,
-        time: endTime - now,
+        filter: (reaction, user) => !user.bot && validEmojis.has(getEmojiKey(reaction.emoji)),
         dispose: true
       });
+
       
       const mentionedInThread = new Set();
 

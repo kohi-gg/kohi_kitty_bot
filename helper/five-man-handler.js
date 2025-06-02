@@ -109,13 +109,18 @@ module.exports = async function handleFivemanEvent(interaction, { title, selecti
       return user.send(`❌ Sorry! The slot for ${role.name} is full.`).catch(() => {});
     }
 
-    for (const [otherKey, otherRole] of Object.entries(roles)) {
+  for (const [otherKey, otherRole] of Object.entries(roles)) {
       if (otherKey !== emojiKey && otherRole.votes.has(user.id || user)) {
         otherRole.votes.delete(user.id || user);
         const otherReaction = eventMessage.reactions.cache.find(r => getEmojiKey(r.emoji) === otherKey);
-        if (otherReaction) await otherReaction.users.remove(user.id);
+        if (otherReaction) {
+          const users = await otherReaction.users.fetch();
+          if (users.has(user.id)) {
+            await otherReaction.users.remove(user.id);
+          }
+        }
       }
-    }
+    } 
 
     role.votes.add(user);
     await updateEmbed();

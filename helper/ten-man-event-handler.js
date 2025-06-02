@@ -113,14 +113,9 @@ module.exports = async function handleTenmanEvent(interaction, { title, selectio
       if (otherKey !== emojiKey && otherRole.votes.has(user.id || user)) {
         otherRole.votes.delete(user.id || user);
         const otherReaction = eventMessage.reactions.cache.find(r => getEmojiKey(r.emoji) === otherKey);
-        if (otherReaction) {
-          const users = await otherReaction.users.fetch();
-          if (users.has(user.id)) {
-            await otherReaction.users.remove(user.id);
-          }
-        }
+        if (otherReaction) await otherReaction.users.remove(user.id);
       }
-    } 
+    }
 
     role.votes.add(user);
     await updateEmbed();
@@ -135,7 +130,7 @@ module.exports = async function handleTenmanEvent(interaction, { title, selectio
     const emojiKey = getEmojiKey(reaction.emoji);
     const role = roles[emojiKey];
     if (role) {
-      role.votes.delete(user);
+      role.votes.delete(user.id);
       await updateEmbed();
     }
   });

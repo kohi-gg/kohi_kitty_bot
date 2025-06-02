@@ -103,13 +103,18 @@ module.exports = async function handleOpenEvent(interaction, { title, selection,
       return user.send(`⚠️ You can't RSVP to **${title}** right now.`).catch(() => {});
     }
 
-    for (const [key, otherRole] of Object.entries(rsvpRoles)) {
-      if (key !== emojiKey && otherRole.votes.has(user.id)) {
-        otherRole.votes.delete(user.id);
-        const otherReaction = eventMessage.reactions.cache.find(r => getEmojiKey(r.emoji) === key);
-        if (otherReaction) await otherReaction.users.remove(user.id);
+    for (const [otherKey, otherRole] of Object.entries(roles)) {
+      if (otherKey !== emojiKey && otherRole.votes.has(user.id || user)) {
+        otherRole.votes.delete(user.id || user);
+        const otherReaction = eventMessage.reactions.cache.find(r => getEmojiKey(r.emoji) === otherKey);
+        if (otherReaction) {
+          const users = await otherReaction.users.fetch();
+          if (users.has(user.id)) {
+            await otherReaction.users.remove(user.id);
+          }
+        }
       }
-    }
+    } 
 
     role.votes.add(user.id);
     await eventStatus.update();

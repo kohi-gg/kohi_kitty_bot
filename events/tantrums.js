@@ -46,28 +46,37 @@ function startTantrumLoop(client, channelId) {
 
 		try {
 			const channel = await client.channels.fetch(channelId);
-			if (!channel || channel.type !== ChannelType.GuildText) return;
+			if (!channel || channel.type !== ChannelType.GuildText) {
+				console.warn("Tantrum channel not found or not a text channel.");
+				isTantrumActive = false;
+				return;
+			}
 
-			const content = getRandomItem(tantrumPhrases);
-			const tantrumMsg = await channel.send(content);
-			await tantrumMsg.react('🍖').catch(console.error);
+			const tantrumMsg = await channel.send(getRandomItem(tantrumPhrases));
+			try {
+				await tantrumMsg.react('🍖');
+			} catch (err) {
+				console.warn("Failed to add reaction:", err);
+			}
 
 			const collector = tantrumMsg.createReactionCollector({
 				filter: (reaction, user) => reaction.emoji.name === '🍖' && !user.bot,
 				max: 5,
-				time: 180_000
+				time: 180_000 // 3 minutes
 			});
 
-			collector.on('collect', (reaction, user) => {
-				channel.send(getRandomItem(thankYouMessages).replace('{userId}', user.id)).catch(console.error);
+			collector.on('collect', async (reaction, user) => {
+				await channel.send(getRandomItem(thankYouMessages).replace('{userId}', user.id)).catch(console.error);
 				collector.stop();
 			});
 
 			collector.on('end', async (collected) => {
 				if (collected.size === 0) {
+					console.log("No one reacted to the tantrum message.");
 					await channel.send("No one helped me... 😿").catch(console.error);
 					await channel.send(getRandomItem(sadMessages)).catch(console.error);
 				}
+
 				isTantrumActive = false;
 				setTimeout(triggerTantrum, getRandomInterval());
 			});

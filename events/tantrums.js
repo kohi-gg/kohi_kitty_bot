@@ -1,6 +1,5 @@
 const { ChannelType } = require('discord.js');
 
-// 🐾 Tantrum phrases with fun and expressive content
 const tantrumPhrases = [
 	"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA 😾",
 	"MEOWWWWWWWWWWWWWWWWWWWWWWWWWWW!",
@@ -14,7 +13,6 @@ const tantrumPhrases = [
 	"hMPFK!!!"
 ];
 
-// 😿 Sad messages and GIFs if no one helps
 const sadMessages = [
 	"https://tenor.com/view/sad-sad-white-cat-sadcat-sad-cat-white-cat-gif-10685945192669892930",
 	"NO ONE CARES HMP!!!!",
@@ -25,7 +23,6 @@ const sadMessages = [
 	"https://tenor.com/view/bard1a-sad-cat-sad-dark-dark-side-gif-11200514925795091536"
 ];
 
-//Thank you messages
 const thankYouMessages = [
 	"Thanks <@{userId}>! I feel better now. 😸",
 	"Aww, you're the best <@{userId}>! 💖",
@@ -36,14 +33,11 @@ const thankYouMessages = [
 	"You gave me pets and snacks! I'm so happy! 🍖🖐️"
 ];
 
-
 let isTantrumActive = false;
 
-function getRandomInterval(minMinutes = 5, maxMinutes = 360) {
-	const minMs = minMinutes * 60 * 1000;
-	const maxMs = maxMinutes * 60 * 1000;
-	return Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
-}
+const getRandomItem = (arr) => arr[Math.floor(Math.random() * arr.length)];
+const delay = (ms) => new Promise(res => setTimeout(res, ms));
+const getRandomInterval = (min = 5, max = 360) => Math.floor(Math.random() * ((max - min) * 60000)) + min * 60000;
 
 function startTantrumLoop(client, channelId) {
 	const triggerTantrum = async () => {
@@ -54,38 +48,25 @@ function startTantrumLoop(client, channelId) {
 			const channel = await client.channels.fetch(channelId);
 			if (!channel || channel.type !== ChannelType.GuildText) return;
 
-			const content = tantrumPhrases[Math.floor(Math.random() * tantrumPhrases.length)];
-
-			const tantrumMsg = await channel.send({ content });
-
-			await tantrumMsg.react('🖐️').catch(console.error);
+			const content = getRandomItem(tantrumPhrases);
+			const tantrumMsg = await channel.send(content);
 			await tantrumMsg.react('🍖').catch(console.error);
 
-			const filter = (reaction, user) =>
-				['🖐️', '🍖'].includes(reaction.emoji.name) && !user.bot;
-
 			const collector = tantrumMsg.createReactionCollector({
-				filter,
+				filter: (reaction, user) => reaction.emoji.name === '🍖' && !user.bot,
 				max: 5,
-				time: 60_000
+				time: 180_000
 			});
 
 			collector.on('collect', (reaction, user) => {
-			const msg = thankYouMessages[Math.floor(Math.random() * thankYouMessages.length)]
-			.replace('{userId}', user.id);
-			channel.send(msg).catch(console.error);
-			collector.stop();
+				channel.send(getRandomItem(thankYouMessages).replace('{userId}', user.id)).catch(console.error);
+				collector.stop();
 			});
-
 
 			collector.on('end', async (collected) => {
 				if (collected.size === 0) {
-					// Wait 3 minutes before sad response
-					await new Promise(resolve => setTimeout(resolve, 3 * 60 * 1000));
-
 					await channel.send("No one helped me... 😿").catch(console.error);
-					const sadMsg = sadMessages[Math.floor(Math.random() * sadMessages.length)];
-					await channel.send(sadMsg).catch(console.error);
+					await channel.send(getRandomItem(sadMessages)).catch(console.error);
 				}
 				isTantrumActive = false;
 				setTimeout(triggerTantrum, getRandomInterval());

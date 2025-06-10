@@ -65,7 +65,7 @@ module.exports = {
     };
 
     const roles = {
-      [`tank:${emojiIds.tank}`]: { name: 'Tank/Heal', emoji: `<:tank:${emojiIds.tank}>`, max: 1, votes: new Set() },
+      [`tank:${emojiIds.tank}`]: { name: 'Tank/Heal', emoji: `<:heart:${emojiIds.tank}>`, max: 1, votes: new Set() },
       [`dps:${emojiIds.dps}`]: { name: 'DPS', emoji: `<:dps:${emojiIds.dps}>`, max: 3, votes: new Set() },
       [`fill:${emojiIds.fill}`]: { name: 'Fill', emoji: `<:uwu:${emojiIds.fill}>`, max: 1, votes: new Set() }
     };

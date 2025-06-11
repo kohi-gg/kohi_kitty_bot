@@ -42,15 +42,36 @@ for (const folder of commandFolders) {
 client.once(Events.ClientReady, c => {
 	console.log(`Ready! Logged in as ${c.user.tag}`);
 	
-	// Set the presence
-	c.user.setPresence({ 
+	var guild = "";
+	// Determine the guild based on the environment variable
+	if (process.env.DEBUG === 'development') {
+		console.log("in development mode...");
+		// In development, we use the TEST_DISCORD_ID from the environment variables
+		guild = client.guilds.cache.get(process.env.TEST_DISCORD_ID);
+	} else if (process.env.DEBUG === 'production') {
+		console.log("in production mode...");
+		// In production, we use the KOHI_DISCORD_ID from the environment variables
+		guild = client.guilds.cache.get(process.env.KOHI_DISCORD_ID);
+	}
+
+	// If the guild is not found, log an error
+	if (!guild) {
+		console.error('Guild not found. Please check your environment variables.');
+		return;
+	}
+	
+	if (guild) {
+		// Set the presence
+		c.user.setPresence({ 
 		activities: [{ 
-			name: '/kohi-help', 
-			type: ActivityType.Playing 
+			name: `over ${guild.name}.`, 
+			type: ActivityType.Watching 
 		}], 
 		status: 'online' 
 
 	});
+	}
+
 	//tantrum loop
 	const startTantrumLoop = require('./events/tantrums');
 	const TANTUM_CHANNEL_ID = '1161806056817709066'; // replace with a real channel ID

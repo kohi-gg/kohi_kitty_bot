@@ -1,6 +1,6 @@
 // tasks.js
 
-const pool = require('./db.js');
+const pool = require('../helper/db.js');
 const { updateWvwTeamRole } = require('./updateWvwTeamRole.js');
 
 /**

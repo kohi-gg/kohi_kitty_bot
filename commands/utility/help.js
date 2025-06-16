@@ -11,16 +11,16 @@ module.exports = {
       description: 'Command list',
       fields: [
         {
-          name: '1. Set your API key using `/kapi`',
+          name: '1. Set your API key using `/set-api`',
           value: `
           Go to: <https://account.arena.net/applications/create>\nYou may use an old API key or create a new API key as long as the following scopes checked.\n  ✅ **account**\n  ✅ **guilds**\n  ✅ **wvw**\nUse the command \`/kapi <your-api-key>\` to provide the bot with your API key. \n**Important:** Keep your API key safe and do not share it with anyone.
           \n
           `,
         },
         {
-          name: '2. Get your WvW role using `/getkakampi`',
+          name: '2. Look for your WvW team using `/whats-my-team`',
           value: `
-            After successfully setting your API key, use the command \`/getkakampi\`.\nThe bot will fetch your WvW team information and assign you the corresponding role.
+            After successfully setting your API key, use the command \`/whats-my-team\`.\nThe bot will fetch your WvW team information and assign you the corresponding role.
             \n
           `,
         },

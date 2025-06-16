@@ -1,15 +1,17 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const { Client, Collection, Events, GatewayIntentBits, ActivityType, Message ,Partials} = require('discord.js');
+const { Client, Collection, Events, GatewayIntentBits, ActivityType, Message, Partials } = require('discord.js');
 const { Breed, TheCatAPI } = require("@thatapicompany/thecatapi");
+const { scheduleWvwRoleUpdate } = require('./cron/wvwRoleCron.js');
+// Load environment variables from .env file
 require('dotenv').config({ path: './.env' });
-const updateTeamId = require('./helper/updateTeamId');
 
-const client = new Client({ intents: [	GatewayIntentBits.Guilds,
-										GatewayIntentBits.GuildMessages,
-										GatewayIntentBits.MessageContent,
-										GatewayIntentBits.GuildMessageReactions, // ✅ Required for reactions
-										GatewayIntentBits.GuildMembers // If you want user mentions in embeds
+const client = new Client({
+	intents: [GatewayIntentBits.Guilds,
+	GatewayIntentBits.GuildMessages,
+	GatewayIntentBits.MessageContent,
+	GatewayIntentBits.GuildMessageReactions, // ✅ Required for reactions
+	GatewayIntentBits.GuildMembers // If you want user mentions in embeds
 	],
 	partials: [Partials.Message, Partials.Reaction, Partials.User]
 });
@@ -41,7 +43,7 @@ for (const folder of commandFolders) {
 
 client.once(Events.ClientReady, c => {
 	console.log(`Ready! Logged in as ${c.user.tag}`);
-	
+
 	var guild = "";
 	// Determine the guild based on the environment variable
 	if (process.env.DEBUG === 'development') {
@@ -59,17 +61,17 @@ client.once(Events.ClientReady, c => {
 		console.error('Guild not found. Please check your environment variables.');
 		return;
 	}
-	
+
 	if (guild) {
 		// Set the presence
-		c.user.setPresence({ 
-		activities: [{ 
-			name: `over ${guild.name}.`, 
-			type: ActivityType.Watching 
-		}], 
-		status: 'online' 
+		c.user.setPresence({
+			activities: [{
+				name: `over ${guild.name}.`,
+				type: ActivityType.Watching
+			}],
+			status: 'online'
 
-	});
+		});
 	}
 
 	//tantrum loop
@@ -84,9 +86,9 @@ client.once(Events.ClientReady, c => {
 
 	startDailyAdvice(client, ADVICE_CHANNEL_ID);
 
-	
- 	// Initialize the cron job here
-	updateTeamId(client);
+
+	// Start all scheduled jobs now that the client is ready.
+	scheduleWvwRoleUpdate(client);
 });
 
 
@@ -135,11 +137,11 @@ client.on(Events.InteractionCreate, async interaction => {
 });
 
 client.on('messageReactionRemove', async (reaction, user) => {
-    if (user.bot) return;
+	if (user.bot) return;
 
-    // Make sure everything is fully fetched (partials!)
-    if (reaction.partial) await reaction.fetch();
-    if (reaction.message.partial) await reaction.message.fetch();
+	// Make sure everything is fully fetched (partials!)
+	if (reaction.partial) await reaction.fetch();
+	if (reaction.message.partial) await reaction.message.fetch();
 
 });
 

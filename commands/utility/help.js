@@ -13,7 +13,8 @@ module.exports = {
         {
           name: '1. Set your API key using `/set-api`',
           value: `
-          Go to: <https://account.arena.net/applications/create>\nYou may use an old API key or create a new API key as long as the following scopes checked.\n  ✅ **account**\n  ✅ **guilds**\n  ✅ **wvw**\nUse the command \`/kapi <your-api-key>\` to provide the bot with your API key. \n**Important:** Keep your API key safe and do not share it with anyone.
+          Go to: <https://account.arena.net/applications/create>\nYou may use an old API key or create a new API key as long as the following scopes checked.\n\n
+            ✅ **account**\n  ✅ **guilds**\n  ✅ **wvw**\n\nUse the command \`/set-api <your-api-key>\` to provide the bot with your API key. \n**Important:** Keep your API key safe and do not share it with anyone.
           \n
           `,
         },

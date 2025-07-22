@@ -152,7 +152,8 @@ module.exports = {
     const collector = message.createReactionCollector({
       filter: (reaction, user) =>
         !user.bot && validEmojiKeys.has(getEmojiKey(reaction.emoji)),
-      dispose: true
+      dispose: true,
+      time: timeUntilEnd
     });
 
     collector.on('collect', async (reaction, user) => {

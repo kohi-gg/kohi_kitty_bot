@@ -149,6 +149,12 @@ module.exports = {
     const validEmojiKeys = new Set(Object.keys(roles));
     const mentionedInThread = new Set();
 
+    const now = Date.now();
+    const timeUntilStart = startTime - now;
+    const timeUntilEnd = Math.max(endTime - Date.now(), 60_000); // 1 min min
+    console.log(`[DEBUG] Setting collector timeout to ${timeUntilEnd}ms`);
+
+
     const collector = message.createReactionCollector({
       filter: (reaction, user) =>
         !user.bot && validEmojiKeys.has(getEmojiKey(reaction.emoji)),
@@ -196,10 +202,7 @@ module.exports = {
 
     await interaction.editReply({ content: `✅ Event **[${shortId}] ${title}** created.` });
 
-    const now = Date.now();
-    const timeUntilStart = startTime - now;
-    const timeUntilEnd = endTime - now;
-
+    
     setTimeout(() => {
       if (eventState.status !== 'Canceled') setStatus('In Progress');
     }, timeUntilStart);

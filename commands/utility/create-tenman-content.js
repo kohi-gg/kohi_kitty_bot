@@ -149,56 +149,67 @@ module.exports = {
     const validEmojiKeys = new Set(Object.keys(roles));
     const mentionedInThread = new Set();
 
-    const now = Date.now();
-    const timeUntilStart = startTime - now;
-    const timeUntilEnd = Math.max(endTime - Date.now(), 60_000); // 1 min min
-    console.log(`[DEBUG] Setting collector timeout to ${timeUntilEnd}ms`);
+let collector;
 
+const attachCollector = () => {
+  const timeRemaining = Math.max(endTime - Date.now(), 60_000);
+  const collectorTime = Math.min(timeRemaining, 6 * 60 * 60 * 1000); // 6 hours
 
-    const collector = message.createReactionCollector({
-      filter: (reaction, user) =>
-        !user.bot && validEmojiKeys.has(getEmojiKey(reaction.emoji)),
-      dispose: true,
-      time: timeUntilEnd
-    });
+  collector = message.createReactionCollector({
+    filter: (reaction, user) =>
+      !user.bot && validEmojiKeys.has(getEmojiKey(reaction.emoji)),
+    dispose: true,
+    time: collectorTime
+  });
 
-    collector.on('collect', async (reaction, user) => {
-      const emojiKey = getEmojiKey(reaction.emoji);
-      const role = roles[emojiKey];
-      if (!role || eventState.status !== 'Scheduled') {
-        await reaction.users.remove(user.id);
-        return user.send('⚠️ Signups are closed.').catch(() => {});
+  collector.on('collect', async (reaction, user) => {
+    const emojiKey = getEmojiKey(reaction.emoji);
+    const role = roles[emojiKey];
+    if (!role || eventState.status !== 'Scheduled') {
+      await reaction.users.remove(user.id);
+      return user.send('⚠️ Signups are closed.').catch(() => {});
+    }
+
+    if (role.votes.size >= role.max) {
+      await reaction.users.remove(user.id);
+      return user.send(`❌ Slot full for ${role.name}.`).catch(() => {});
+    }
+
+    for (const [key, r] of Object.entries(roles)) {
+      if (key !== emojiKey && r.votes.has(user)) {
+        r.votes.delete(user);
+        const rReact = message.reactions.cache.find(r => getEmojiKey(r.emoji) === key);
+        if (rReact) await rReact.users.remove(user.id);
       }
+    }
 
-      if (role.votes.size >= role.max) {
-        await reaction.users.remove(user.id);
-        return user.send(`❌ Slot full for ${role.name}.`).catch(() => {});
-      }
+    role.votes.add(user);
+    updateEmbed();
 
-      for (const [key, r] of Object.entries(roles)) {
-        if (key !== emojiKey && r.votes.has(user)) {
-          r.votes.delete(user);
-          const rReact = message.reactions.cache.find(r => getEmojiKey(r.emoji) === key);
-          if (rReact) await rReact.users.remove(user.id);
-        }
-      }
+    if (!mentionedInThread.has(user.id)) {
+      mentionedInThread.add(user.id);
+      thread.send(`👋 <@${user.id}> signed up as **${role.name}**!`);
+    }
+  });
 
-      role.votes.add(user);
+  collector.on('remove', async (reaction, user) => {
+    const emojiKey = getEmojiKey(reaction.emoji);
+    if (roles[emojiKey]) {
+      roles[emojiKey].votes.delete(user);
       updateEmbed();
+    }
+  });
 
-      if (!mentionedInThread.has(user.id)) {
-        mentionedInThread.add(user.id);
-        thread.send(`👋 <@${user.id}> signed up as **${role.name}**!`);
-      }
-    });
+  collector.on('end', (_, reason) => {
+    console.log(`[Collector] Ended due to: ${reason}`);
+    if (eventState.status === 'Scheduled' && Date.now() < endTime) {
+      attachCollector(); // reattach another collector
+    }
+  });
+};
 
-    collector.on('remove', async (reaction, user) => {
-      const emojiKey = getEmojiKey(reaction.emoji);
-      if (roles[emojiKey]) {
-        roles[emojiKey].votes.delete(user);
-        updateEmbed();
-      }
-    });
+attachCollector(); // ✅ Start the first collector
+
 
     await interaction.editReply({ content: `✅ Event **[${shortId}] ${title}** created.` });
 

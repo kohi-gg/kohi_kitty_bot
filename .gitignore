@@ -48,8 +48,8 @@ build/Release
 node_modules/
 jspm_packages/
 bot/node_modules/
-uploader/bin/
-uploader/obj/
+uploader/KohiLogUploader/bin
+uploader/KohiLogUploader/obj
 
 # Snowpack dependency directory (https://snowpack.dev/)
 web_modules/
@@ -112,7 +112,6 @@ dist
 
 # vuepress v2.x temp and cache directory
 .temp
-.cache
 
 # Docusaurus cache and generated files
 .docusaurus
@@ -148,7 +147,24 @@ dist
 *.suo
 *.user
 *.sln.docstates
+.idea/
+uploader/.idea/
+.git/*
 
 # Misc
 .DS_Store
 Thumbs.db
+
+# Default ignored files
+/shelf/
+/workspace.xml
+# Rider ignored files
+/projectSettingsUpdater.xml
+/modules.xml
+/.idea.uploader.iml
+/contentModel.xml
+# Editor-based HTTP Client requests
+/httpRequests/
+# Datasource local storage ignored files
+/dataSources/
+/dataSources.local.xml

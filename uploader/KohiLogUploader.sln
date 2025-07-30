@@ -2,9 +2,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "uploader", "uploader", "{4DCEFC32-33E0-B41D-B5F8-33448D4C0414}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KohiLogUploader", "uploader\KohiLogUploader\KohiLogUploader.csproj", "{0708BF1A-4202-2773-9D39-B0C6A6105B3B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KohiLogUploader", "KohiLogUploader\KohiLogUploader.csproj", "{0708BF1A-4202-2773-9D39-B0C6A6105B3B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -47,6 +47,9 @@ build/Release
 # Dependency directories
 node_modules/
 jspm_packages/
+bot/node_modules/
+uploader/bin/
+uploader/obj/
 
 # Snowpack dependency directory (https://snowpack.dev/)
 web_modules/
@@ -84,6 +87,7 @@ web_modules/
 .env.test.local
 .env.production.local
 .env.local
+bot/.env
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -134,3 +138,17 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# IDEs and Caches
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.suo
+*.user
+*.sln.docstates
+
+# Misc
+.DS_Store
+Thumbs.db

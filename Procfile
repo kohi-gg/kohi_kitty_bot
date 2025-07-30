@@ -1,1 +1,1 @@
-web: node deploy-commands.js ; node index.js
+web: node bot/deploy-commands.js ; node bot/index.js

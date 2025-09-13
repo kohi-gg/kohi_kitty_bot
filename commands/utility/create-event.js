@@ -53,7 +53,7 @@ module.exports = {
     const roleMention = `<@&${roleID}>`;
 
     //checks channel #lfg
-    //let botChannel = "1371750538626207754";
+    let botChannel = "1371750538626207754";
     if(interaction.channel.id != '1371750538626207754')
       {
         

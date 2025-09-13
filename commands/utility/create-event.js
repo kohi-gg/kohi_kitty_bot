@@ -59,7 +59,7 @@ module.exports = {
         
       let MsgEmbed = new EmbedBuilder()
               .setColor("#c47cca")
-              .setTitle(`Please use #lfg channel thanks!`)
+              .setTitle(`Please use <#${botChannel.toString()}> channel thanks!`)
               interaction.reply({embeds:[MsgEmbed]});
               return;
 

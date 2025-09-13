@@ -1,104 +1,112 @@
-// create-event.js
-const {
-  SlashCommandBuilder,
-  ChannelType,
-  ThreadAutoArchiveDuration,
-  EmbedBuilder,
-  ActionRowBuilder,
-  ButtonBuilder,
-  ButtonStyle
-} = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, ThreadAutoArchiveDuration } = require('discord.js');
+const Event = require("../../helper/eventdata");
 
-const isValidDateFormat = date => /^\d{4}-\d{2}-\d{2}$/.test(date);
-const isValidTimeFormat = time => /^\d{2}:\d{2}$/.test(time);
-const to12HourTime = date => date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-const getEmojiKey = emoji => `${emoji.name}:${emoji.id}`;
-const getAllSignedUserIds = roles => {
-  const ids = new Set();
-  for (const role of Object.values(roles)) {
-    for (const user of role.votes) ids.add(user.id || user);
-  }
-  return ids;
+const EVENT_ROLE = {
+  fractal: "1149898453242093608",
+  dungeon:"1192031906880049182",
+  raid:"1149898360954835044",
+  openworld:"1178537577003896932",
+  wvw:"1149898698675998741",
+  strikes: "1149898797921611887",
 };
+
+const GROUP_FIELDS = {
+  five: { Tank: 1, BoonDPS: 1, DPS: 3 },
+  ten: { Tank: 2, BoonDPS: 2, DPS: 6 },
+  unlimited: { Participants: Infinity }
+};
+
+const EMOJI_ID = {
+    Tank: "<:heart:1146979167330644019>",
+    BoonDPS: "<:alacrity:1149886586369085510>",
+    DPS: "<:dps:1149886591922352219>",
+    Participants: "👥" // fallback for unlimited
+}
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('create-event')
-    .setDescription('Create an event (open world, 10-man, or 5-man)')
+    .setDescription('Create an event (Fractals, Dungeon, Raid, Open World, WvW, Strikes)')
     .addStringOption(option =>
-      option.setName('event-type')
-        .setDescription('Type of content')
+      option.setName("title")
+        .setDescription("Set your title for this content")
+        .setRequired(true)
+    )
+    .addStringOption(option =>
+      option.setName("content")
+        .setDescription("Ex. Fractals | Dungeon | Raid | Open World | WvW")
         .setRequired(true)
         .addChoices(
-          { name: 'Open World / WvW', value: 'open' },
-          { name: '10-man (Raids/Strikes)', value: 'tenman' },
-          { name: '5-man (Fractals/Dungeons)', value: 'fiveman' }
-        ))
-    .addStringOption(option =>
-      option.setName('title')
-        .setDescription('Title of the event')
-        .setRequired(true))
-    .addStringOption(option =>
-      option.setName('selection')
-        .setDescription('Choose sub-type of content')
-        .setRequired(true)
-        .addChoices(
-          { name: 'KOHI WvW', value: 'kohiwvw' },
-          { name: 'Open World', value: 'openworld' },
-          { name: 'Raids', value: 'raids' },
-          { name: 'Strikes', value: 'strikes' },
-          { name: 'Fractals', value: 'fractals' },
-          { name: 'Dungeon', value: 'dungeon' }
-        ))
-    .addStringOption(option =>
-      option.setName('event-date')
-        .setDescription('Event date (YYYY-MM-DD)')
-        .setRequired(true))
-    .addStringOption(option =>
-      option.setName('event-time')
-        .setDescription('Event time (HH:MM in 24hr format)')
-        .setRequired(true))
-    .addIntegerOption(option =>
-      option.setName('duration')
-        .setDescription('Duration in minutes')
-        .setRequired(true)),
+          { name: "Fractals", value: "fractal" },
+          { name: "Dungeon", value: "dungeon" },
+          { name: "Raid", value: "raid" },
+          { name: "Open World", value: "openworld" },
+          { name: "WvW", value: "wvw" },
+          { name: "Strikes Mission", value: "strikes" },
+        )
+    ),
 
   async execute(interaction) {
-    const eventType = interaction.options.getString('event-type');
-    const title = interaction.options.getString('title');
-    const selection = interaction.options.getString('selection');
-    const date = interaction.options.getString('event-date');
-    const time = interaction.options.getString('event-time');
-    const duration = interaction.options.getInteger('duration');
+    const contentTitle = interaction.options.getString("title");
+    const contentType = interaction.options.getString("content");
+    const roleID = EVENT_ROLE[contentType];
+    const roleMention = `<@&${roleID}>`;
 
-    if (!isValidDateFormat(date) || !isValidTimeFormat(time)) {
-      return interaction.reply({ content: '❌ Invalid date or time format. Use YYYY-MM-DD and HH:MM (24hr).', ephemeral: true });
+    // group type
+    let group;
+    if (["fractal", "dungeon"].includes(contentType)) {
+      group = GROUP_FIELDS.five;
+    } else if (["raid", "strikes"].includes(contentType)) {
+      group = GROUP_FIELDS.ten;
+    } else {
+      group = GROUP_FIELDS.unlimited;
     }
 
-    const startTime = new Date(`${date}T${time}:00`);
-    const endTime = new Date(startTime.getTime() + duration * 60000);
-    const now = Date.now();
+    // initialize signup counts
+    const signupCounts = {};
+    for (const role in group) signupCounts[role] = 0;
 
-    if (isNaN(startTime) || startTime <= now) {
-      return interaction.reply({ content: '⚠️ The event must be scheduled for a future time.', ephemeral: true });
-    }
+    const embed = new EmbedBuilder()
+      .setColor("#c47cca")
+      .setTitle(contentTitle.toUpperCase())
+      .setDescription(`Hosted by: <@${interaction.user.id}>`)
+      .addFields(
+        Object.entries(group).map(([role, limit]) => ({
+        name: `${EMOJI_ID[role] || ""} ${role} (${0}/${limit === Infinity ? "∞" : limit})`,
+        value: "-",
+        inline: true,
+        }))
+        );
 
-    await interaction.deferReply({ ephemeral: true });
+    // send event message
+    const eventMessage = await interaction.reply({
+      content: roleMention,
+      embeds: [embed],
+      allowedMentions: { roles: [roleID] },
+      fetchReply: true
+    });
 
-    // Delegate to event-type-specific logic
-    if (eventType === 'open') {
-      const openHandler = require('../../helper/open-event-handler.js');
-      return await openHandler(interaction, { title, selection, startTime, endTime });
-    }
-    if (eventType === 'tenman') {
-      const tenmanHandler = require('../../helper/ten-man-event-handler.js');
-      return await tenmanHandler(interaction, { title, selection, startTime, endTime });
-    }
-    if (eventType === 'fiveman') {
-      const fivemanHandler = require('../../helper/five-man-handler.js');
-      return await fivemanHandler(interaction, { title, selection, startTime, endTime });
-    }
+    // create signup thread
+    const thread = await eventMessage.startThread({
+      name: `${contentTitle}-signups`,
+      autoArchiveDuration: ThreadAutoArchiveDuration.OneDay,
+    });
 
-    return interaction.editReply({ content: '❌ Unknown event type.' });
-  }
+    // save to MongoDB
+    const newEvent = new Event({
+      threadId: thread.id,
+      channelId: eventMessage.channel.id,
+      messageId: eventMessage.id,
+      hostId: interaction.user.id,
+      title: contentTitle,
+      contentType,
+      signupCounts,
+      signups: {},
+      group
+    });
+
+    await newEvent.save();
+
+    await thread.send(`This is the signup thread for **${contentTitle}**. Use \`/join\` + role to join! \`/leave\` to change role or fully leave. For host you can remove any user type \`/remove-user\` + name and reason (optional)`);
+  },
 };

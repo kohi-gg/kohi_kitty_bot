@@ -52,6 +52,19 @@ module.exports = {
     const roleID = EVENT_ROLE[contentType];
     const roleMention = `<@&${roleID}>`;
 
+    //checks channel #lfg
+    //let botChannel = "1371750538626207754";
+    if(interaction.channel.id != '1371750538626207754')
+      {
+        
+      let MsgEmbed = new EmbedBuilder()
+              .setColor("#c47cca")
+              .setTitle(`Please use #lfg channel thanks!`)
+              interaction.reply({embeds:[MsgEmbed]});
+              return;
+
+      }
+
     // group type
     let group;
     if (["fractal", "dungeon"].includes(contentType)) {

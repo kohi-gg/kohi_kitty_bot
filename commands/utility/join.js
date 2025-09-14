@@ -34,6 +34,11 @@ module.exports = {
     const eventData = await Event.findOne({ threadId });
     if (!eventData) return interaction.editReply({ content: "❌ This thread is not linked to an event." });
 
+    //Blocking join if event is close
+    if (eventData.isClosed) {
+    return interaction.editReply({ content: "🚪 This event has been closed and is no longer accepting new signups." });
+    }
+
     const { group, channelId, messageId, hostId } = eventData;
 
     if (!(roleChoice in group)) return interaction.editReply({ content: `❌ ${roleChoice} is not valid for this event.` });
@@ -47,11 +52,6 @@ module.exports = {
     if (group[roleChoice] !== Infinity && count >= group[roleChoice]) {
       return interaction.editReply({ content: `❌ The **${roleChoice}** slots are full.` });
     }
-
-    if (event.isClosed) {
-    return interaction.reply({ content: "🚫 This event is closed. No further signups allowed.", ephemeral: true });
-    }
-
 
     // Create signup
     await EventSignup.create({ eventId: eventData._id, userId: interaction.user.id, role: roleChoice });

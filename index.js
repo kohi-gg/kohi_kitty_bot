@@ -86,6 +86,11 @@ client.once(Events.ClientReady, c => {
 
 	startDailyAdvice(client, ADVICE_CHANNEL_ID);
 
+	const startCleanupJob = require("./jobs/cleanup");
+
+	// After client.login(...)
+	startCleanupJob();
+
 
 	// Start all scheduled jobs now that the client is ready.
 	scheduleWvwRoleUpdate(client);

@@ -48,6 +48,11 @@ module.exports = {
       return interaction.editReply({ content: `❌ The **${roleChoice}** slots are full.` });
     }
 
+    if (event.isClosed) {
+    return interaction.reply({ content: "🚫 This event is closed. No further signups allowed.", ephemeral: true });
+    }
+
+
     // Create signup
     await EventSignup.create({ eventId: eventData._id, userId: interaction.user.id, role: roleChoice });
 

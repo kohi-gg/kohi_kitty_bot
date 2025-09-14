@@ -36,7 +36,7 @@ module.exports = {
 
     //Blocking join if event is close
     if (eventData.isClosed) {
-    return interaction.editReply({ content: "🚪 This event has been closed and is no longer accepting new signups." });
+    return interaction.editReply({ content: "This event has been closed and is no longer accepting new signups." });
     }
 
     const { group, channelId, messageId, hostId } = eventData;

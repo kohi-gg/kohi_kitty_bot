@@ -86,7 +86,7 @@ client.once(Events.ClientReady, c => {
 
 	startDailyAdvice(client, ADVICE_CHANNEL_ID);
 
-	const startCleanupJob = require("./jobs/cleanup");
+	const startCleanupJob = require("./events/cleanup");
 
 	// After client.login(...)
 	startCleanupJob();

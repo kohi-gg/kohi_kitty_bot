@@ -8,7 +8,8 @@ const eventSchema = new Schema({
   title: { type: String, required: true },
   contentType: { type: String, required: true },
   group: { type: Object, required: true },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
+  isClosed: { type: Boolean, default: false }
 });
 
 module.exports = model("Event", eventSchema);

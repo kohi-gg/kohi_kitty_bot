@@ -82,7 +82,7 @@ module.exports = {
     const embed = new EmbedBuilder()
       .setColor("#c47cca")
       .setTitle(contentTitle.toUpperCase())
-      .setDescription(`Hosted by: <@${interaction.user.id}>`)
+      .setDescription(`Hosted by: <@${interaction.user.id}> Use \`/sqjoin\` + role to join! \`/leave\` to change role or fully leave`)
       .addFields(
         Object.entries(group).map(([role, limit]) => ({
         name: `${EMOJI_ID[role] || ""} ${role} (${0}/${limit === Infinity ? "∞" : limit})`,

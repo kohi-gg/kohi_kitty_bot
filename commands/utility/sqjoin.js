@@ -85,7 +85,9 @@ module.exports = {
     try {
       if (hostId) {
         const host = await interaction.client.users.fetch(hostId);
-        await host.send(`${interaction.user.tag} signed up as **${roleChoice}** in "${eventData.title}".`);
+        const member = await interaction.guild.members.fetch(interaction.user.id);
+        const displayName = member.nickname || interaction.user.username;
+        await host.send(`${displayName} signed up as **${roleChoice}** in "${eventData.title}".`);
       }
     } catch (err) { console.error(err); }
 

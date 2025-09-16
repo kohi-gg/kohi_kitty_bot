@@ -120,6 +120,6 @@ module.exports = {
 
     await newEvent.save();
 
-    await thread.send(`This is the signup thread for **${contentTitle}**. Use \`/sqjoin\` + role to join! \`/leave\` to change role or fully leave. For host you can remove any user type \`/remove-user\` + name and reason (required)`);
+    await thread.send(`This is the signup thread for **${contentTitle}**. Use \`/sqjoin\` + role to join! \`/leave\` to change role or fully leave. For host you can remove any user type \`/remove-user\` + name and reason (required) \`note: only host can close this event type /close-event + eventID or Message ID of the main embed.\``);
   },
 };

@@ -7,6 +7,7 @@ const ROLE_EMOJIS = {
   BoonDPS: "<:alacrity:1149886586369085510>",
   DPS: "<:dps:1149886591922352219>",
   Participants: "👥",
+  Fill: "🪑",
 };
 
 module.exports = {
@@ -22,6 +23,7 @@ module.exports = {
           { name: "BoonDPS", value: "BoonDPS" },
           { name: "DPS", value: "DPS" },
           { name: "Participants", value: "Participants" },
+          { name: "Fill", value: "Fill" },
         )
     ),
 

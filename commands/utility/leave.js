@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const Event = require("../../helper/eventdata");
 const EventSignup = require("../../helper/eventsignup");
 
@@ -7,24 +7,35 @@ const ROLE_EMOJIS = {
   BoonDPS: "<:alacrity:1149886586369085510>",
   DPS: "<:dps:1149886591922352219>",
   Participants: "👥",
+  Fill: "🪑",
 };
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('leave')
-    .setDescription('Leave your signed-up role in this event'),
+    .setDescription('Leave your signed-up role in this event')
+    .addStringOption(option =>
+      option.setName("reason")
+        .setDescription("Reason for leaving")
+        .setRequired(true)
+    ),
 
   async execute(interaction) {
     await interaction.deferReply({ ephemeral: true });
 
+    const reason = interaction.options.getString("reason");
     const threadId = interaction.channel.id;
     const eventData = await Event.findOne({ threadId });
-    if (!eventData) return interaction.editReply({ content: "❌ This thread is not linked to an event." });
+    if (!eventData) {
+      return interaction.editReply({ content: "❌ This thread is not linked to an event." });
+    }
 
     const { group, channelId, messageId, hostId } = eventData;
 
     const signup = await EventSignup.findOne({ eventId: eventData._id, userId: interaction.user.id });
-    if (!signup) return interaction.editReply({ content: "⚠️ You are not signed up for this event." });
+    if (!signup) {
+      return interaction.editReply({ content: "⚠️ You are not signed up for this event." });
+    }
 
     const userRole = signup.role;
     await signup.deleteOne();
@@ -54,16 +65,18 @@ module.exports = {
 
     await message.edit({ embeds: [embed] });
 
-    // DM host
+    // DM host with reason
     try {
       if (hostId) {
         const host = await interaction.client.users.fetch(hostId);
         const member = await interaction.guild.members.fetch(interaction.user.id);
         const displayName = member.nickname || interaction.user.username;
-        await host.send(`${displayName} left their **${userRole}** slot in "${eventData.title}".`);
+        await host.send(`${displayName} left their **${userRole}** slot in "${eventData.title}".\nReason: ${reason}`);
       }
-    } catch (err) { console.error(err); }
+    } catch (err) {
+      console.error(err);
+    }
 
-    await interaction.editReply({ content: `✅ You left your **${userRole}** slot.` });
+    await interaction.editReply({ content: `✅ You left your **${userRole}** slot.\nReason: ${reason}` });
   },
 };

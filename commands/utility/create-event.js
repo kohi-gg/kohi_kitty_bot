@@ -11,9 +11,9 @@ const EVENT_ROLE = {
 };
 
 const GROUP_FIELDS = {
-  five: { Tank: 1, BoonDPS: 1, DPS: 3 },
-  ten: { Tank: 2, BoonDPS: 2, DPS: 6 },
-  unlimited: { Participants: Infinity, FIll: Infinity}
+  five: { Tank: 1, BoonDPS: 1, DPS: 3, Fill: 5 },
+  ten: { Tank: 2, BoonDPS: 2, DPS: 6, Fill: 10 },
+  unlimited: { Participants: Infinity}
 };
 
 const EMOJI_ID = {

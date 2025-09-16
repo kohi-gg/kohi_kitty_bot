@@ -54,7 +54,7 @@ module.exports = {
 
     //checks channel #lfg
     let botChannel = "1371750538626207754";
-    if(interaction.channel.id != '1371750538626207754' || '1159721580964880414')
+    if(interaction.channel.id != '1371750538626207754')
       {
         
       let MsgEmbed = new EmbedBuilder()

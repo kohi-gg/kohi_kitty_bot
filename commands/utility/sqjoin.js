@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const Event = require("../../helper/eventdata");
 const EventSignup = require("../../helper/eventsignup");
 
@@ -25,29 +25,36 @@ module.exports = {
           { name: "Participants", value: "Participants" },
           { name: "Fill", value: "Fill" },
         )
+    )
+    .addUserOption(option =>
+      option.setName("other")
+        .setDescription("Optionally sign up another member")
+        .setRequired(false)
     ),
 
   async execute(interaction) {
     await interaction.deferReply({ ephemeral: true });
 
     const roleChoice = interaction.options.getString("role");
+    const targetUser = interaction.options.getUser("other") || interaction.user;
     const threadId = interaction.channel.id;
 
     const eventData = await Event.findOne({ threadId });
     if (!eventData) return interaction.editReply({ content: "❌ This thread is not linked to an event." });
 
-    //Blocking join if event is close
     if (eventData.isClosed) {
-    return interaction.editReply({ content: "This event has been closed and is no longer accepting new signups." });
+      return interaction.editReply({ content: "This event has been closed and is no longer accepting new signups." });
     }
 
     const { group, channelId, messageId, hostId } = eventData;
 
     if (!(roleChoice in group)) return interaction.editReply({ content: `❌ ${roleChoice} is not valid for this event.` });
 
-    // Check if user already signed up
-    const existing = await EventSignup.findOne({ eventId: eventData._id, userId: interaction.user.id });
-    if (existing) return interaction.editReply({ content: `⚠️ You already signed up as **${existing.role}**.` });
+    // Check if already signed up
+    const existing = await EventSignup.findOne({ eventId: eventData._id, userId: targetUser.id });
+    if (existing) {
+      return interaction.editReply({ content: `⚠️ ${targetUser.id === interaction.user.id ? "You are" : `<@${targetUser.id}> is`} already signed up as **${existing.role}**.` });
+    }
 
     // Check role limit
     const count = await EventSignup.countDocuments({ eventId: eventData._id, role: roleChoice });
@@ -56,7 +63,7 @@ module.exports = {
     }
 
     // Create signup
-    await EventSignup.create({ eventId: eventData._id, userId: interaction.user.id, role: roleChoice });
+    await EventSignup.create({ eventId: eventData._id, userId: targetUser.id, role: roleChoice });
 
     // Rebuild embed
     const channel = await interaction.client.channels.fetch(channelId);
@@ -87,12 +94,19 @@ module.exports = {
     try {
       if (hostId) {
         const host = await interaction.client.users.fetch(hostId);
-        const member = await interaction.guild.members.fetch(interaction.user.id);
-        const displayName = member.nickname || interaction.user.username;
-        await host.send(`${displayName} signed up as **${roleChoice}** in "${eventData.title}".`);
+        const member = await interaction.guild.members.fetch(targetUser.id);
+        const displayName = member.nickname || targetUser.username;
+
+        const signer = (targetUser.id === interaction.user.id)
+          ? `${displayName}`
+          : `${interaction.user.username} signed up ${displayName}`;
+
+        await host.send(`${signer} as **${roleChoice}** in "${eventData.title}".`);
       }
     } catch (err) { console.error(err); }
 
-    await interaction.editReply({ content: `✅ You signed up as **${roleChoice}**` });
+    await interaction.editReply({ 
+      content: `✅ ${targetUser.id === interaction.user.id ? "You signed up" : `<@${targetUser.id}> was signed up`} as **${roleChoice}**`
+    });
   },
 };

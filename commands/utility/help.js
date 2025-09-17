@@ -29,6 +29,10 @@ module.exports = {
           name: '3. Need Help?',
           value: 'If you encounter any errors, issues, or have concerns, feel free to ping <@&1158659592767668286>.',
         },
+        {
+          name: '/create-event',
+          value: 'create a group content in GW2',
+        },
       ],
       timestamp: new Date(),
       footer: {

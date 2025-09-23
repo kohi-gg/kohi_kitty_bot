@@ -153,9 +153,7 @@ client.on('messageReactionRemove', async (reaction, user) => {
 client.on(Events.MessageCreate, async (message) => {
 	if (message.author.bot) return;
 
-	//if (message.channel.id !== "1161806056817709066") return;
-
-	if (Math.random() > 0.2) return;
+	if (Math.random() > 0.1) return;
 
 	const meowified = meowify(message.content);
 
@@ -166,13 +164,16 @@ client.on(Events.MessageCreate, async (message) => {
 });
 
 function meowify(text) {
-	// Replace vowels with "meow" randomly
-	return text.replace(/[aeiou]/gi, (char) => {
-		if (Math.random() > 0.5) {
-			return "meow";
-		}
-		return char;
-	});
+	const words = text.split(/\s+/);
+	if (words.length === 0) return text;
+
+	// Replace first letter of the first word
+	const firstWord = words[0];
+	if (firstWord.length > 0) {
+		words[0] = "meow" + firstWord.slice(1);
+	}
+
+	return words.join(" ");
 }
 
 if (process.env.DEBUG === 'development') {

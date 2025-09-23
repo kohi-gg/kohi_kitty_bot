@@ -24,8 +24,25 @@ const commandFolders = fs.readdirSync(foldersPath);
 //MODELS
 const Data = require("./helper/data")
 
+//Channel list (exception)
+const EXCEPTION_CHANNELS = [
+	"1151368598988783646",
+	"1151367076313837588",
+	"1191988352560406559",
+	"1371750538626207754",
+	"1175259018801971331",
+	"1160840900507881482",
+	"1193748324164059196",
+	"1241302472618934313",
+	"1160841042870939689",
+	"1193496566368059402",
+	"1192702591117824000",
+	"1416995825250209874",
+];
+
 // setting up and run server
 const server = require('./server/server');
+
 
 for (const folder of commandFolders) {
 	const commandsPath = path.join(foldersPath, folder);
@@ -152,6 +169,8 @@ client.on('messageReactionRemove', async (reaction, user) => {
 
 client.on(Events.MessageCreate, async (message) => {
 	if (message.author.bot) return;
+
+	if (EXCEPTION_CHANNELS.includes(message.channel.id)) return;
 
 	if (Math.random() > 0.02) return;
 

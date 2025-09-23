@@ -153,7 +153,7 @@ client.on('messageReactionRemove', async (reaction, user) => {
 client.on(Events.MessageCreate, async (message) => {
 	if (message.author.bot) return;
 
-	if (Math.random() > 0.1) return;
+	if (Math.random() > 0.02) return;
 
 	const meowified = meowify(message.content);
 

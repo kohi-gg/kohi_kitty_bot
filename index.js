@@ -153,6 +153,8 @@ client.on('messageReactionRemove', async (reaction, user) => {
 client.on(Events.MessageCreate, async (message) => {
 	if (message.author.bot) return;
 
+	if (message.channel.id !== "1161806056817709066") return;
+
 	// Optional: random chance trigger (20%)
 	if (Math.random() > 0.2) return;
 

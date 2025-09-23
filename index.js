@@ -8,16 +8,18 @@ require('dotenv').config({ path: './.env' });
 
 const client = new Client({
 	intents: [GatewayIntentBits.Guilds,
-	GatewayIntentBits.GuildMessages,
-	GatewayIntentBits.MessageContent,
-	GatewayIntentBits.GuildMessageReactions, // ✅ Required for reactions
-	GatewayIntentBits.GuildMembers // If you want user mentions in embeds
+		GatewayIntentBits.GuildVoiceStates, // Required to check if a user is in a voice channel
+		GatewayIntentBits.GuildMessages,
+		GatewayIntentBits.MessageContent,
+		GatewayIntentBits.GuildMessageReactions, // ✅ Required for reactions
+		GatewayIntentBits.GuildMembers // If you want user mentions in embeds
 	],
 	partials: [Partials.Message, Partials.Reaction, Partials.User]
 });
 
 client.cooldowns = new Collection();
 client.commands = new Collection();
+client.queues = new Map(); // For music queues
 const foldersPath = path.join(__dirname, 'commands');
 const commandFolders = fs.readdirSync(foldersPath);
 

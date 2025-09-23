@@ -150,6 +150,30 @@ client.on('messageReactionRemove', async (reaction, user) => {
 
 });
 
+client.on(Events.MessageCreate, async (message) => {
+	if (message.author.bot) return;
+
+	// Optional: random chance trigger (20%)
+	if (Math.random() > 0.2) return;
+
+	const meowified = meowify(message.content);
+
+	// Only reply if something changed
+	if (meowified !== message.content) {
+		await message.reply(meowified);
+	}
+});
+
+function meowify(text) {
+	// Replace vowels with "meow" randomly
+	return text.replace(/[aeiou]/gi, (char) => {
+		if (Math.random() > 0.5) {
+			return "meow";
+		}
+		return char;
+	});
+}
+
 if (process.env.DEBUG === 'development') {
 	console.log("in debug mode...");
 	client.login(process.env.TEST_DISCORD_TOKEN);

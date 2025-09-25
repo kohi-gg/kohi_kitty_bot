@@ -8,16 +8,18 @@ require('dotenv').config({ path: './.env' });
 
 const client = new Client({
 	intents: [GatewayIntentBits.Guilds,
-	GatewayIntentBits.GuildMessages,
-	GatewayIntentBits.MessageContent,
-	GatewayIntentBits.GuildMessageReactions, // ✅ Required for reactions
-	GatewayIntentBits.GuildMembers // If you want user mentions in embeds
+		GatewayIntentBits.GuildVoiceStates, // Required to check if a user is in a voice channel
+		GatewayIntentBits.GuildMessages,
+		GatewayIntentBits.MessageContent,
+		GatewayIntentBits.GuildMessageReactions, // ✅ Required for reactions
+		GatewayIntentBits.GuildMembers // If you want user mentions in embeds
 	],
 	partials: [Partials.Message, Partials.Reaction, Partials.User]
 });
 
 client.cooldowns = new Collection();
 client.commands = new Collection();
+client.queues = new Map(); // For music queues
 const foldersPath = path.join(__dirname, 'commands');
 const commandFolders = fs.readdirSync(foldersPath);
 
@@ -183,15 +185,16 @@ client.on(Events.MessageCreate, async (message) => {
 });
 
 function meowify(text) {
-	return text
-		.split(/\s+/) // split into words
-		.map(word => {
-			if (word.length <= 4) {
-				return "meow";
-			}
-			return "meow" + word.slice(4);
-		})
-		.join(" ");
+	const words = text.split(/\s+/);
+	if (words.length === 0) return text;
+
+	// Replace first letter of the first word
+	const firstWord = words[0];
+	if (firstWord.length > 0) {
+		words[0] = "meow" + firstWord.slice(1);
+	}
+
+	return words.join(" ");
 }
 
 if (process.env.DEBUG === 'development') {

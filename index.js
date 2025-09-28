@@ -190,33 +190,19 @@ client.on('messageReactionRemove', async (reaction, user) => {
 
 });
 
+
 client.on(Events.MessageCreate, async (message) => {
 	if (message.author.bot) return;
 
 	if (EXCEPTION_CHANNELS.includes(message.channel.id)) return;
 
-	if (Math.random() > 0.02) return;
+	if (Math.random() > 0.03) return;
 
-	const meowified = meowify(message.content);
+	const replies = ["meow 😺", "nya~", "meow~", "nya!", "ARF! ARF!", "HAHAHAHA"];
+	const reply = replies[Math.floor(Math.random() * replies.length)];
 
-	// Only reply if something changed
-	if (meowified !== message.content) {
-		await message.reply(meowified);
-	}
+	await message.reply(reply);
 });
-
-function meowify(text) {
-	return text
-		.split(/\s+/) // split into words
-		.map(word => {
-			if (word.length <= 4) {
-				return "meow";
-			}
-			// Replace first 3 letters with "meow"
-			return "meow" + word.slice(4);
-		})
-		.join(" ");
-}
 
 if (process.env.DEBUG === 'development') {
 	console.log("in debug mode...");

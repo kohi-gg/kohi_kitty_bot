@@ -206,16 +206,16 @@ client.on(Events.MessageCreate, async (message) => {
 });
 
 function meowify(text) {
-	const words = text.split(/\s+/);
-	if (words.length === 0) return text;
-
-	// Replace first letter of the first word
-	const firstWord = words[0];
-	if (firstWord.length > 0) {
-		words[0] = "meow" + firstWord.slice(1);
-	}
-
-	return words.join(" ");
+	return text
+		.split(/\s+/) // split into words
+		.map(word => {
+			if (word.length <= 4) {
+				return "meow";
+			}
+			// Replace first 3 letters with "meow"
+			return "meow" + word.slice(4);
+		})
+		.join(" ");
 }
 
 if (process.env.DEBUG === 'development') {

@@ -27,6 +27,7 @@ module.exports = {
                 guildId: interaction.guild.id,
                 adapterCreator: interaction.guild.voiceAdapterCreator,
                 selfDeaf: true, // This is the option to deafen the bot
+                selfMute: true
             });
 
             await interaction.reply({ content: `✅ Joined **${voiceChannel.name}** and deafened.` });

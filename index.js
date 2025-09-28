@@ -198,7 +198,7 @@ client.on(Events.MessageCreate, async (message) => {
 
 	if (Math.random() > 0.03) return;
 
-	const replies = ["meow 😺", "nya~", "meow~", "nya!", "ARF! ARF!", "HAHAHAHA"];
+	const replies = ["meow 😺", "nya~", "meow~", "nya!", "ARF! ARF!", "HAHAHAHA", "EH ANO???","weeeeeee???","potek hahahaha", "dinga?"];
 	const reply = replies[Math.floor(Math.random() * replies.length)];
 
 	await message.reply(reply);

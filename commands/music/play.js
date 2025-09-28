@@ -6,14 +6,25 @@ const play = require('play-dl');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('meowsic-play')
-        .setDescription('Play a song.')
+        .setDescription('Play a song from Youtube, Spotify, or SoundCloud.')
         .addStringOption(option =>
             option.setName('query')
                 .setDescription('The URL or search term of the song to play.')
-                .setRequired(true)),
+                .setRequired(true))
+        .addStringOption(option =>
+            option.setName('source')
+                .setDescription('Force the search on a specific platform.')
+                .setRequired(false)
+                .addChoices(
+                    { name: 'YouTube', value: 'youtube' },
+                    { name: 'Spotify', value: 'spotify' },
+                    { name: 'SoundCloud', value: 'soundcloud' },
+                )),
+
     async execute(interaction) {
         const query = interaction.options.getString('query');
         const voiceChannel = interaction.member.voice.channel;
+        const source = interaction.options.getString('source');
 
         // 1. Initial checks
         if (!voiceChannel) {
@@ -27,101 +38,160 @@ module.exports = {
 
         await interaction.deferReply();
 
-        // 2. Search for the song
-        const searchResults = await play.search(query, { limit: 1 });
+        // Validate query type
+        const sourceType = await play.validate(query);
 
-        if (searchResults.length === 0) {
-            return interaction.editReply('No results found for your query.');
+        if (!sourceType) {
+            return interaction.editReply({
+                content: "Could not find anything for that query. Try using a valid URL or title."
+            });
         }
 
-        const video = searchResults[0];
-        const stream = await play.stream(song.url);
+        let songs = [];
+        let replyMessage = "";
 
-        const song = {
-            title: video.title,
-            url: video.url,
-            duration: video.durationRaw,
-            thumbnail: video.thumbnails[0].url,
-            requrestedBy: interaction.user.tag,
-            stream: stream,
-        };
+        // Logic for Forced Search (if 'source' is provided)
+        if (source) {
+            const searchOptions = { limit: 1, source: {} };
+            searchOptions.source[source] = source === 'youtube' ? 'video' : 'track';
 
-        // 3. Get of Create the Queue
-        let serverQueue = interaction.client.queue.get(interaction.guild.id);
-
-        if (!serverQueue) {
-            const queueContruct = {
-                voiceChannel: voiceChannel,
-                connection: null,
-                songs: [],
-            };
-
-            interaction.client.queue.set(interaction.guild.id, queueContruct);
-            serverQueue = interaction.client.queues.get(interaction.guild.id);
-
-            serverQueue.songs.push(song);
-
-            try {
-                const connection = joinVoiceChannel({
-                    channelId: voiceChannel.id,
-                    guildId: interaction.guild.id,
-                    adapterCreator: interaction.guild.voiceAdapterCreator,
-                });
-                queueContruct.connection = connection;
-                connection.subscribe(serverQueue.player);
-                await playSong(interaction.guild.id, interaction.client.queues);
-            } catch (err) {
-                interaction.client.queue.delete(interaction.guild.id);
-                console.error(err);
+            const searchResult = await play.search(query, searchOptions);
+            if (searchResult.length === 0) {
                 return interaction.editReply({
-                    content: 'There was an error connecting to the voice channel!',
+                    content: `❌ I couldn't find any results for "${query}" on ${source}.`
                 });
             }
-        } else {
-            serverQueue.songs.push(song);
-            return interaction.editReply({
-                content: `**${song.title}** has been added to the queue!`,
+
+            const video = searchResult[0];
+            console.log(video);
+            songs.push({
+                title: video.title,
+                url: video.url,
+                duration: video.durationRaw,
+                thumbnail: video.thumbnails[0].url,
+                requestedBy: interaction.user.tag,
             });
+            replyMessage = `👍 **${songs[0].title}** has been added to the queue!`;
+        } else {
+                        // 3. Logic for Automatic Detection (if no 'source' is provided)
+            const sourceType = await play.validate(query);
+
+            if (sourceType === 'yt_video' || sourceType === 'sp_track' || sourceType === 'am_track' || sourceType === 'so_track') {
+                const videoInfo = await play.search(query, { limit: 1 });
+                const video = videoInfo[0];
+                console.log(video);
+                songs.push({
+                    title: video.title,
+                    url: video.url,
+                    duration: video.durationRaw,
+                    thumbnail: video.thumbnails[0].url,
+                    requestedBy: interaction.user.tag,
+                });
+                replyMessage = `👍 **${songs[0].title}** has been added to the queue!`;
+
+            } else if (sourceType === 'yt_playlist' || sourceType === 'sp_playlist' || sourceType === 'sp_album' || sourceType === 'am_playlist' || sourceType === 'am_album') {
+                const playlist = await play.playlist_info(query, { incomplete: true });
+                const videos = await playlist.all_videos();
+                for (const video of videos) {
+                    songs.push({
+                        title: video.title,
+                        url: video.url,
+                        duration: video.durationRaw,
+                        thumbnail: video.thumbnails[0].url,
+                        requestedBy: interaction.user.tag,
+                    });
+                }
+                replyMessage = `✅ Added **${songs.length}** songs from the playlist/album to the queue!`;
+            
+            } else { // Fallback to a default search if it's not a recognized URL
+                const searchResult = await play.search(query, { limit: 1 });
+                if (searchResult.length === 0) {
+                    return interaction.editReply({ content: `❌ I couldn't find any results for "${query}".` });
+                }
+                const video = searchResult[0];
+                console.log(video);
+                songs.push({
+                    title: video.title,
+                    url: video.url,
+                    duration: video.durationRaw,
+                    thumbnail: video.thumbnails[0].url,
+                    requestedBy: interaction.user.tag,
+                });
+                replyMessage = `👍 **${songs[0].title}** has been added to the queue!`;
+            }
         }
 
-            return interaction.editReply({
-                content: `Started playing: **${song.title}**`,
-            });
-        },
+               if (songs.length === 0) {
+            return interaction.editReply({ content: "❌ I couldn't find what you were looking for. Please try again." });
+        }
 
+        // 4. Handle the queue and connection
+        await handleQueue(interaction, songs, replyMessage);
+    },
 };
 
-// Helper function to play the song and handle the queue
+// --- Helper Functions ---
+
+async function handleQueue(interaction, songs, replyMessage) {
+    const serverQueue = interaction.client.queues.get(interaction.guild.id);
+
+    if (!serverQueue) {
+        const queueContract = {
+            voiceChannel: interaction.member.voice.channel,
+            connection: null,
+            player: createAudioPlayer(),
+            songs: songs,
+        };
+        interaction.client.queues.set(interaction.guild.id, queueContract);
+
+        try {
+            const connection = joinVoiceChannel({
+                channelId: interaction.member.voice.channel.id,
+                guildId: interaction.guild.id,
+                adapterCreator: interaction.guild.voiceAdapterCreator,
+            });
+            queueContract.connection = connection;
+            connection.subscribe(queueContract.player);
+            await interaction.editReply(replyMessage);
+            playSong(interaction.guild.id, interaction.client.queues);
+        } catch (err) {
+            interaction.client.queues.delete(interaction.guild.id);
+            console.error(err);
+            await interaction.editReply({ content: 'I could not join the voice channel.' });
+        }
+    } else {
+        serverQueue.songs = serverQueue.songs.concat(songs);
+        await interaction.editReply(replyMessage);
+    }
+}
+
 async function playSong(guildId, queues) {
     const serverQueue = queues.get(guildId);
     if (!serverQueue) return;
 
     if (serverQueue.songs.length === 0) {
-        // If queue is empty, leave the channel after a delay
         setTimeout(() => {
-            if (serverQueue.songs.length === 0) {
-                serverQueue.connection.destroy();
+            if (queues.has(guildId) && queues.get(guildId).songs.length === 0) {
+                queues.get(guildId).connection.destroy();
                 queues.delete(guildId);
             }
-        }, 30000); // 30 seconds
-        return;    
+        }, 300000); // Disconnect after 5 minutes of inactivity
+        return;
     }
 
     const song = serverQueue.songs[0];
-    const resource = createAudioResource(song.stream.stream, { inputType: song.stream.type });
-    
-    serverQueue.player.play(resource);
+    try {
+        const stream = await play.stream(song.url);
+        const resource = createAudioResource(stream.stream, { inputType: stream.type });
+        serverQueue.player.play(resource);
 
-    // Event listener for when the song ends
-    serverQueue.player.once(AudioPlayerStatus.Idle, () => {
-        serverQueue.songs.shift(); // Remove the finished song from the queue
-        playSong(guildId, queues); // Play the next song
-    });
-
-    serverQueue.player.on('error', error => {
-        console.error(`Error: ${error.message} with resource ${error.resource.metadata.title}`);
+        serverQueue.player.once(AudioPlayerStatus.Idle, () => {
+            serverQueue.songs.shift();
+            playSong(guildId, queues);
+        });
+    } catch (error) {
+        console.error(`Error streaming [${song.title}]: ${error.message}`);
         serverQueue.songs.shift();
         playSong(guildId, queues);
-    });
-        
+    }
 }

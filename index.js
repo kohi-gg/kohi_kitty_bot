@@ -3,8 +3,29 @@ const path = require('node:path');
 const { Client, Collection, Events, GatewayIntentBits, ActivityType, Message, Partials } = require('discord.js');
 const { Breed, TheCatAPI } = require("@thatapicompany/thecatapi");
 const { scheduleWvwRoleUpdate } = require('./cron/wvwRoleCron.js');
+const play = require('play-dl');
+
 // Load environment variables from .env file
 require('dotenv').config({ path: './.env' });
+
+// --- PLAY-DL CONFIG ---
+async function configurePlayDl() {
+	await play.setToken({
+		spotify: {
+			client_id: process.env.SPOTIFY_CLIENT_ID,
+			client_secret: process.env.SPOTIFY_CLIENT_SECRET,
+			refresh_token: process.env.SPOTIFY_REFRESH_TOKEN,
+			market: 'US'
+		}
+	});
+	if (play.is_expired()) {
+		await play.refreshToken();
+	}
+	console.log('play-dl configured successfully!');
+}
+configurePlayDl();
+// ------------------------
+
 
 const client = new Client({
 	intents: [GatewayIntentBits.Guilds,

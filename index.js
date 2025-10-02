@@ -200,7 +200,7 @@ client.on(Events.MessageCreate, async (message) => {
 
 	const replies = ["meow 😺", "nya~", "meow~", "nya!", "ARF! ARF!", "HAHAHAHA", "EH ANO???","weeeeeee???","potek hahahaha", "dinga?",
 		"Hala Bakit?", "ganun?", "pero ok ka lang?", "sanaol! AHAHAHA", "bukas makalawa", "sana ok ka lang",
-		"batet?", "eh kung ganon wag nalang", "oh?", "oh talaga??","true!!","sikret!!","utot mo blue! HAHAHA"
+		"batet?", "eh kung ganon wag nalang", "oh?", "oh talaga??","true!!","sikret!!","utot mo blue! HAHAHA","maya bz aq","oh talaga?"
 	];
 	const reply = replies[Math.floor(Math.random() * replies.length)];
 

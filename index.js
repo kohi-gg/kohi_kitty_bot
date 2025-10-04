@@ -3,12 +3,12 @@ const path = require('node:path');
 const { Client, Collection, Events, GatewayIntentBits, ActivityType, Message, Partials } = require('discord.js');
 const { Breed, TheCatAPI } = require("@thatapicompany/thecatapi");
 const { scheduleWvwRoleUpdate } = require('./cron/wvwRoleCron.js');
-const play = require('play-dl');
+//const play = require('play-dl'); -- for music pero pagaaralan ko pa.
 
 // Load environment variables from .env file
 require('dotenv').config({ path: './.env' });
 
-// --- PLAY-DL CONFIG ---
+/* // --- PLAY-DL CONFIG ---  disabled for now
 async function configurePlayDl() {
 	await play.setToken({
 		spotify: {
@@ -23,7 +23,7 @@ async function configurePlayDl() {
 	}
 	console.log('play-dl configured successfully!');
 }
-configurePlayDl();
+configurePlayDl(); */
 // ------------------------
 
 

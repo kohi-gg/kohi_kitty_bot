@@ -1,4 +1,5 @@
     {
+            "0": { "en": "No Team",                "de": "No Team",                      "es": "No Team",                  "fr": "No Team"                     },
         "11001": { "en": "Moogooloo",              "de": "Muuguuluu",                    "es": "Mugulú",                   "fr": "Moogooloo"                   },
         "11002": { "en": "Rall's Rest",            "de": "Ralls Rast",                   "es": "Descanso de Rall",         "fr": "Repos de Rall"               },
         "11003": { "en": "Domain of Torment",      "de": "Domäne der Pein",              "es": "Dominio de Tormento",      "fr": "Domaine du tourment"         },

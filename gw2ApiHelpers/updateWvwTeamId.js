@@ -24,12 +24,18 @@ async function updateWvwTeamId(discordUserId) {
 
         const { api_key: apiKey, team_id: oldTeamId } = dbResult.rows[0];
 
+
         const wvwTeamsPath = path.join(__dirname, 'wvwTeams.json');
         const wvwTeamsData = await fs.readFile(wvwTeamsPath, 'utf8');
         const wvwTeams = JSON.parse(wvwTeamsData);
 
         // Step 2: Get the current team ID from the GW2 API using the retrieved key.
         const newTeamId = await getWvwTeamId(apiKey);
+
+        if (newTeamId == 0) {
+            console.log(`User ${discordUserId} is not currently assigned to any WvW team.`);
+            return "No WvW Team Assigned";
+        }
 
         // Step 3: Compare the old and new team IDs.
         if (newTeamId == oldTeamId) {

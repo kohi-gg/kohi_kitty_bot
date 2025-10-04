@@ -133,7 +133,13 @@ client.once(Events.ClientReady, c => {
 
 
 	// Start all scheduled jobs now that the client is ready.
-	scheduleWvwRoleUpdate(client);
+	// jeph edit 2025/10/04
+	// Pass the channel ID for WvW notifications from environment variables.
+	// Make sure to set WVW_CHANNEL_ID in your .env file.
+	// Example: WVW_CHANNEL_ID=123456789012345678
+	// lagay natin lagi sa env files para mas madali i-configure
+	// and less chance of hardcoding the wrong value.
+	scheduleWvwRoleUpdate(client, process.env.WVW_CHANNEL_ID);
 });
 
 

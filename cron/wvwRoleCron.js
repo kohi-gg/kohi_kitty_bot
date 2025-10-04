@@ -6,8 +6,9 @@ const { updateAllUsersWvwRoles } = require('../gw2ApiHelpers/tasks.js');
 /**
  * Schedules the weekly WvW role update task.
  * @param {Client} client - The Discord.js Client instance.
+ * @param {string} channelId - The ID of the channel to send notifications to.
  */
-function scheduleWvwRoleUpdate(client) {
+function scheduleWvwRoleUpdate(client, channelId) {
     // Cron schedule for every Saturday at 10:15 AM.
     // Format: (Minute Hour DayOfMonth Month DayOfWeek)
     // '15 10 * * 6' means at 10:15 on Saturday.
@@ -17,7 +18,7 @@ function scheduleWvwRoleUpdate(client) {
 
     cron.schedule(schedule, () => {
         console.log(`[Cron Job] It's time! Triggering the weekly role update task.`);
-        updateAllUsersWvwRoles(client);
+        updateAllUsersWvwRoles(client, channelId);
     }, {
         scheduled: true,
         timezone: "Asia/Manila" // IMPORTANT: Set the timezone to your location.

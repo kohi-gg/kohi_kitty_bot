@@ -115,10 +115,10 @@ client.once(Events.ClientReady, c => {
 	}
 
 	//tantrum loop
-	const startTantrumLoop = require('./events/tantrums');
+	/*const startTantrumLoop = require('./events/tantrums');
 	const TANTUM_CHANNEL_ID = '1161806056817709066'; // replace with a real channel ID
 
-	startTantrumLoop(client, TANTUM_CHANNEL_ID);
+	startTantrumLoop(client, TANTUM_CHANNEL_ID);*/
 
 	//Daily Advice 8AM PH time
 	const startDailyAdvice = require('./events/dailyAdvice');

@@ -34,7 +34,7 @@ async function generateKohiResponse(message, ai) {
         if (conversationHistory.length === 0) {
             currentQuestion = message.content.replace(/<@!?(\d+)>/, '').trim();
                     // If there's no question after the mention, do not do anything
-            if (!question) {
+            if (!currentQuestion) {
                 message.reply('Meow? Did you want to ask me something? Purrrr....');
                 return;
             }

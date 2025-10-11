@@ -1,4 +1,4 @@
-// validateApi.js
+// gw2ApiHelpers/validateApi.js
 
 const axios = require('axios');
 
@@ -36,6 +36,9 @@ async function validateApi(apiKey) {
             if (status === 403) { // 403 Forbidden
                 // It's better to give a single, comprehensive scope error.
                 throw new Error('Your API key is missing required permissions. Please create an [ArenaNet API Key](<https://account.arena.net/applications/create>) with `account`, `guilds`, and `wvw` scopes checked.');
+            }
+            if (status === 503) { // 503 Service Unavailable
+                throw new Error('The Guild Wars 2 API is currently unavailable (Status 503). Please try again later.');
             }
             // Handle other potential server errors
             throw new Error(`The Guild Wars 2 API returned an error (Status ${status}). Please check your API again.`);

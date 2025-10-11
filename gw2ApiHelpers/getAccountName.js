@@ -1,4 +1,4 @@
-// getAccountName.js
+// gw2ApiHelpers/getAccountName.js
 
 const axios = require('axios');
 
@@ -24,6 +24,9 @@ async function getAccountName(apiKey) {
 
     } catch (error) {
         // 4. Handle potential errors (e.g., invalid key, network issue)
+        if (error.response && error.response.status === 503) {
+            throw new Error('The Guild Wars 2 API is temporarily unavailable (Status 503). Please try again later.');
+        }
         console.error('Error fetching account name from GW2 API:', error.message);
         // Re-throw the error so the function that called this one knows it failed.
         throw error;

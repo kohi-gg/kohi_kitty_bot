@@ -1,4 +1,4 @@
-// getGuildId.js
+// gw2ApiHelpers/getGuildId.js
 
 const axios = require("axios");
 //require("dotenv").config({ path: "./.env" });
@@ -29,6 +29,9 @@ async function getGuildId(apiKey) {
   } catch (error) {
     // Provide a more informative error message
     if (error.response) {
+      if (error.response.status === 503) {
+        throw new Error("Guild Wars 2 API is currently unavailable (503 Service Unavailable). Please try again later.");
+      }
       console.error(
         `Error fetching Guild ID: Received status ${error.response.status} from API.`
       );

@@ -1,4 +1,4 @@
-// getWvwTeamId.js
+// gw2ApiHelpers/getWvwTeamId.js
 
 const axios = require("axios");
 
@@ -24,6 +24,9 @@ async function getWvwTeamId(apiKey) {
   } catch (error) {
     // Provide a more informative error message
     if (error.response) {
+      if (error.response.status === 503) {
+        throw new Error("The Guild Wars 2 API is currently unavailable (503). Please try again later.");
+      }
       console.error(
         `Error fetching WvW Team ID: Received status ${error.response.status} from API.`
       );

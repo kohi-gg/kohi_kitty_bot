@@ -1,4 +1,4 @@
-// getGuildTeamId.js
+// gw2ApiHelpers/getGuildTeamId.js
 
 const axios = require('axios');
 // Import the function from your existing file
@@ -43,6 +43,9 @@ async function getGuildTeamId(apiKey) {
         return teamId;
 
     } catch (error) {
+        if (error.response && error.response.status === 503) {
+            throw new Error('The Guild Wars 2 API is temporarily unavailable (Status 503). Please try again later.');
+        }
         console.error('Error during the process of getting the guild team ID:', error.message);
         throw error;
     }

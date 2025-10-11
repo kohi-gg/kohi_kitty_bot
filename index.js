@@ -115,10 +115,10 @@ client.once(Events.ClientReady, c => {
 	}
 
 	//tantrum loop
-	const startTantrumLoop = require('./events/tantrums');
+	/*const startTantrumLoop = require('./events/tantrums');
 	const TANTUM_CHANNEL_ID = '1161806056817709066'; // replace with a real channel ID
 
-	startTantrumLoop(client, TANTUM_CHANNEL_ID);
+	startTantrumLoop(client, TANTUM_CHANNEL_ID);*/
 
 	//Daily Advice 8AM PH time
 	const startDailyAdvice = require('./events/dailyAdvice');
@@ -206,7 +206,7 @@ client.on(Events.MessageCreate, async (message) => {
 
 	const replies = ["meow 😺", "nya~", "meow~", "nya!", "ARF! ARF!", "HAHAHAHA", "EH ANO???","weeeeeee???","potek hahahaha", "dinga?",
 		"Hala Bakit?", "ganun?", "pero ok ka lang?", "sanaol! AHAHAHA", "bukas makalawa", "sana ok ka lang",
-		"batet?", "eh kung ganon wag nalang", "oh?", "oh talaga??","true!!","sikret!!","utot mo blue! HAHAHA","maya bz aq","oh talaga?"
+		"batet?", "eh kung ganon wag nalang", "oh?", "oh talaga??","true!!","sikret!!","utot mo blue! HAHAHA","maya bz aq","oh talaga?","agree ako jan, meow!"
 	];
 	const reply = replies[Math.floor(Math.random() * replies.length)];
 

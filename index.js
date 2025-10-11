@@ -1,9 +1,13 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { Client, Collection, Events, GatewayIntentBits, ActivityType, Message, Partials } = require('discord.js');
-const { Breed, TheCatAPI } = require("@thatapicompany/thecatapi");
+//const { Breed, TheCatAPI } = require("@thatapicompany/thecatapi");
 const { scheduleWvwRoleUpdate } = require('./cron/wvwRoleCron.js');
 //const play = require('play-dl'); -- for music pero pagaaralan ko pa.
+
+// added by serjeph
+const { GoogleGenAI } = require('@google/genai');
+const { handleMention } = require('./handlers/mentionHandler.js');
 
 // Load environment variables from .env file
 require('dotenv').config({ path: './.env' });
@@ -36,6 +40,12 @@ const client = new Client({
 		GatewayIntentBits.GuildMembers // If you want user mentions in embeds
 	],
 	partials: [Partials.Message, Partials.Reaction, Partials.User]
+});
+
+// Initialize Gemini AI
+// serjeph
+const ai = new GoogleGenAI({
+	apiKey: process.env.GEMINI_API_KEY
 });
 
 client.cooldowns = new Collection();
@@ -199,6 +209,11 @@ client.on('messageReactionRemove', async (reaction, user) => {
 
 client.on(Events.MessageCreate, async (message) => {
 	if (message.author.bot) return;
+
+	// now powered with Gemini AI
+	if (message.mentions.has(client.user.id)) {
+		await handleMention(message, ai);
+	}
 
 	if (EXCEPTION_CHANNELS.includes(message.channel.id)) return;
 

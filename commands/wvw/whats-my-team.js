@@ -44,6 +44,11 @@ module.exports = {
 
         } catch (error) {
             console.error('Error fetching WvW team:', error);
+            if (error.message.includes('503')) {
+                return interaction.editReply({
+                    content: 'The Guild Wars 2 API is currently unavailable. Please try again later.'
+                });
+            }
             return interaction.editReply({
                 content: 'An error occurred while fetching your WvW team information.'
             });

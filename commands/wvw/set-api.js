@@ -42,7 +42,11 @@ module.exports = {
 
         } catch (error) {
             console.error('Error validating API key:', error.message);
-            await interaction.editReply({ content: error.message, ephemeral: true });
+            if (error.message.includes('503')) {
+                await interaction.editReply({ content: 'Guild Wars 2 API is currently unavailable (503). Please try again later.', ephemeral: true });
+            } else {
+                await interaction.editReply({ content: error.message, ephemeral: true });
+            }
         }
     },
 };

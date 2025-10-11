@@ -53,6 +53,9 @@ async function updateAllUsersWvwRoles(client, channelId) {
             } catch (error) {
                 // Log an error for a single user but continue the loop for the others.
                 console.error(`Failed to process user ${user.discord_user_id}. Error: ${error.message}`);
+                if (error.message.includes('503')) {
+                    await sendNofication(`Guild Wars 2 API is currently unavailable (503) when processing user <@${user.discord_user_id}>. Skipping to next user.`);
+                }
                 failureCount++;
                 //await sendNofication(`Failed to process user <@${user.discord_user_id}>. Error: ${error.message}`);
             }
@@ -61,7 +64,11 @@ async function updateAllUsersWvwRoles(client, channelId) {
         await sendNofication(`Weekly WvW role update complete. Successfully processed ${successCount} user(s). ${failureCount} user(s) failed.`);
     } catch (error) {
         console.error('A critical error occurred during the updateAllUsersWvwRoles task:', error);
-        await sendNofication('A critical error occurred during the WvW role update task. Check logs for details.');
+        if (error.message.includes('503')) {
+            await sendNofication('Guild Wars 2 API is currently unavailable (503). The Scheduled WvW team role update task could not be completed.');
+        } else {
+            await sendNofication('A critical error occurred during the WvW role update task. Check logs for details.');
+        }
     } finally {
         console.log('--- Weekly WvW role update task finished ---');
         await sendNofication('--- Weekly WvW role update task finished ---');

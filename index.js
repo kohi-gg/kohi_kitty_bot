@@ -7,7 +7,7 @@ const { scheduleWvwRoleUpdate } = require('./cron/wvwRoleCron.js');
 
 // added by serjeph
 const { GoogleGenAI } = require('@google/genai');
-const { handleMention } = require('./handlers/mentionHandler.js');
+const { generateKohiResponse } = require('./handlers/geminiHandler.js');
 
 // Load environment variables from .env file
 require('dotenv').config({ path: './.env' });
@@ -210,22 +210,40 @@ client.on('messageReactionRemove', async (reaction, user) => {
 client.on(Events.MessageCreate, async (message) => {
 	if (message.author.bot) return;
 
+
 	// now powered with Gemini AI
-	if (message.mentions.has(client.user.id)) {
-		await handleMention(message, ai);
+	let isReplyToBot = false;
+	// Check if the message is a reply
+	if (message.reference && message.reference.messageId) {
+		try {
+			const referencedMessage = await message.channel.messages.fetch(message.reference.messageId);
+			// Check if the replied-to message is from the bot
+			if (referencedMessage.author.id === message.client.user.id) {
+				isReplyToBot = true;
+			}
+		} catch (error) {
+			console.error("Could not fetch the referenced message, it might have been deleted.");
+		}
 	}
 
-	if (EXCEPTION_CHANNELS.includes(message.channel.id)) return;
+	// If the bot is mentioned OR the message is a reply to the bot, trigger generateKohiResponse
+	if (message.mentions.has(client.user.id) || isReplyToBot) {
+		await generateKohiResponse(message, ai);
+	} else { // Otherwise, fall back to the random reply logic
+		if (EXCEPTION_CHANNELS.includes(message.channel.id)) return;
 
-	if (Math.random() > 0.03) return;
+		if (Math.random() > 0.03) return;
 
-	const replies = ["meow 😺", "nya~", "meow~", "nya!", "ARF! ARF!", "HAHAHAHA", "EH ANO???","weeeeeee???","potek hahahaha", "dinga?",
-		"Hala Bakit?", "ganun?", "pero ok ka lang?", "sanaol! AHAHAHA", "bukas makalawa", "sana ok ka lang",
-		"batet?", "eh kung ganon wag nalang", "oh?", "oh talaga??","true!!","sikret!!","utot mo blue! HAHAHA","maya bz aq","oh talaga?","agree ako jan, meow!"
-	];
-	const reply = replies[Math.floor(Math.random() * replies.length)];
+		const replies = ["meow 😺", "nya~", "meow~", "nya!", "ARF! ARF!", "HAHAHAHA", "EH ANO???","weeeeeee???","potek hahahaha", "dinga?",
+			"Hala Bakit?", "ganun?", "pero ok ka lang?", "sanaol! AHAHAHA", "bukas makalawa", "sana ok ka lang",
+			"batet?", "eh kung ganon wag nalang", "oh?", "oh talaga??","true!!","sikret!!","utot mo blue! HAHAHA","maya bz aq","oh talaga?","agree ako jan, meow!"
+		];
+		const reply = replies[Math.floor(Math.random() * replies.length)];
 
-	await message.reply(reply);
+		await message.reply(reply);
+	}
+
+
 });
 
 if (process.env.DEBUG === 'development') {

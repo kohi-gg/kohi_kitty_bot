@@ -1,1 +1,2 @@
-web: node deploy-commands.js ; node index.js
+release: node deploy-commands.js
+web: node index.js

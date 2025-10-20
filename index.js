@@ -239,7 +239,7 @@ client.on(Events.MessageCreate, async (message) => {
 			"batet?", "eh kung ganon wag nalang", "oh?", "oh talaga??","true!!","sikret!!","utot mo blue! HAHAHA","maya bz aq","oh talaga?","agree ako jan, meow!",
 			"Ok sige", "Oo nalang .. Duhhh", "Diba hindi?", "shempre hindi", "sana ginawa mo na", "wala to?!?", "mama mo!", "mama mo cute", "Boss", "share mo lang?",
 			"gusto kaba?", "yun lang!", "shet inaantok nako", "mahal mo?", "uy wag ka mama ko cute", "suntukan", "vaklang toh?!", "PAYB TAWSAN!!", "BIGYAN NG JACKET!!",
-			"PANGET :P", "luh?", "weak! AHAHA!"
+			"PANGET :P", "luh?", "weak! AHAHA!", "sige nga, kiss mo nga ako..."
 		];
 		const reply = replies[Math.floor(Math.random() * replies.length)];
 

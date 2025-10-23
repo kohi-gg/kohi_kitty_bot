@@ -200,6 +200,8 @@ client.on(Events.InteractionCreate, async interaction => {
 client.on('messageReactionRemove', async (reaction, user) => {
 	if (user.bot) return;
 
+
+
 	// Make sure everything is fully fetched (partials!)
 	if (reaction.partial) await reaction.fetch();
 	if (reaction.message.partial) await reaction.message.fetch();
@@ -209,6 +211,9 @@ client.on('messageReactionRemove', async (reaction, user) => {
 
 client.on(Events.MessageCreate, async (message) => {
 	if (message.author.bot) return;
+	
+	//ignore @here & @everyone
+	if (message.content.includes('@everyone') || message.content.includes('@here')) return;
 
 
 	// now powered with Gemini AI

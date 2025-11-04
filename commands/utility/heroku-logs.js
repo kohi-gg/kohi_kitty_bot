@@ -145,7 +145,7 @@ module.exports = {
       if (error.response) {
         errorMessage = `Heroku API Error: ${error.response.status} - ${error.response.data?.message || 'No specific message.'}`;
       } else if (error.request) {
-        errorMessage = 'No response received from Her. The service might be down.';
+        errorMessage = 'No response received from Heroku. The service might be down.';
       } else {
         errorMessage = `Error: ${error.message}`;
       }

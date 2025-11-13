@@ -36,7 +36,7 @@ Kohi Kitty Bot is a multipurpose Discord bot designed for the KOHI Guild, a Guil
 
 ## Getting Started
 
-1.  **Clone the repository:** `git clone https://github.com/your-username/kohi-kitty-bot.git`
+1.  **Clone the repository:** `git clone https://github.com/kohi-gg/kohi-kitty-bot.git`
 2.  **Install dependencies:** `npm install`
 3.  **Configure the bot:**
       * Create a `.env` file in the root directory.

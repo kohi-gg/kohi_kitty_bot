@@ -215,6 +215,12 @@ client.on(Events.MessageCreate, async (message) => {
 	//ignore @here & @everyone
 	if (message.content.includes('@everyone') || message.content.includes('@here')) return;
 
+	//reinforce lfg channel
+	const restrictedChannel = "1371750538626207754";
+	if (message.channel.id === restrictedChannel) {
+        await message.delete().catch(() => {});
+	}
+
 
 	// now powered with Gemini AI
 	let isReplyToBot = false;

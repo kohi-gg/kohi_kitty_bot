@@ -8,11 +8,13 @@ const EVENT_ROLE = {
   openworld:"1178537577003896932",
   wvw:"1149898698675998741",
   strikes: "1149898797921611887",
+  convergence: "1178537577003896932",
 };
 
 const GROUP_FIELDS = {
   five: { Tank: 1, BoonDPS: 1, DPS: 3, Fill: 5 },
   ten: { Tank: 2, BoonDPS: 2, DPS: 6, Fill: 10 },
+  tenSubs: {Tank: 10 , BoonDPS: 10, DPS: 30 },
   unlimited: { Participants: Infinity}
 };
 
@@ -26,7 +28,7 @@ const EMOJI_ID = {
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('create-event')
-    .setDescription('Create an event (Fractals, Dungeon, Raid, Open World, WvW, Strikes)')
+    .setDescription('Create an event (Fractals, Dungeon, Raid, Open World, WvW, Strikes, Convergence)')
     .addStringOption(option =>
       option.setName("title")
         .setDescription("Set your title for this content")
@@ -34,7 +36,7 @@ module.exports = {
     )
     .addStringOption(option =>
       option.setName("content")
-        .setDescription("Ex. Fractals | Dungeon | Raid | Open World | WvW")
+        .setDescription("Ex. Fractals | Dungeon | Raid | Open World | WvW | Convergence")
         .setRequired(true)
         .addChoices(
           { name: "Fractals", value: "fractal" },
@@ -43,6 +45,7 @@ module.exports = {
           { name: "Open World", value: "openworld" },
           { name: "WvW", value: "wvw" },
           { name: "Strikes Mission", value: "strikes" },
+          { name: "Convergence", value: "convergence"}
         )
     ),
 

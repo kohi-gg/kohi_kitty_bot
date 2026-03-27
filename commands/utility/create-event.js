@@ -12,14 +12,14 @@ const EVENT_ROLE = {
 };
 
 const GROUP_FIELDS = {
-  five: { Tank: 1, BoonDPS: 1, DPS: 3, Fill: 5 },
-  ten: { Tank: 2, BoonDPS: 2, DPS: 6, Fill: 10 },
-  tenSubs: { Tank: 10, BoonDPS: 10, DPS: 30 },
+  five: { "Tank/Healer": 1, BoonDPS: 1, DPS: 3, Fill: 5 },
+  ten: { "Tank/Healer": 2, BoonDPS: 2, DPS: 6, Fill: 10 },
+  tenSubs: { "Tank/Healer": 10, BoonDPS: 10, DPS: 30 },
   unlimited: { Participants: Infinity }
 };
 
 const EMOJI_ID = {
-  Tank: "<:heart:1146979167330644019>",
+  "Tank/Healer": "<:heart:1146979167330644019>",
   BoonDPS: "<:alacrity:1149886586369085510>",
   DPS: "<:dps:1149886591922352219>",
   Participants: "👥"

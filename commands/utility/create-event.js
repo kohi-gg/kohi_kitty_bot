@@ -53,17 +53,20 @@ module.exports = {
     const roleMention = `<@&${roleID}>`;
 
     //checks channel #lfg
-    let botChannel = "1371750538626207754";
-    if(interaction.channel.id != '1371750538626207754')
-      {
-        
-      let MsgEmbed = new EmbedBuilder()
-              .setColor("#c47cca")
-              .setTitle(`Please use <#${botChannel.toString()}> channel thanks!`)
-              interaction.reply({embeds:[MsgEmbed]});
-              return;
+    const allowedChannels = [
+    "1371750538626207754",
+    "1364930867591516250"
+    ];
 
-      }
+    if (!allowedChannels.includes(interaction.channel.id)) {
+
+      let MsgEmbed = new EmbedBuilder()
+      .setColor("#c47cca")
+      .setTitle(`Please use <#${'1371750538626207754'}> channel thanks!`);
+
+    await interaction.reply({ embeds: [MsgEmbed], ephemeral: true });
+    return;
+    }
 
     // group type
     let group;

@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder } = require('discord.js');
 const Event = require("../../helper/eventdata");
 const EventSignup = require("../../helper/eventsignup");
 
@@ -40,55 +40,62 @@ module.exports = {
     const threadId = interaction.channel.id;
 
     const eventData = await Event.findOne({ threadId });
-    if (!eventData) return interaction.editReply({ content: "❌ This thread is not linked to an event." });
+    if (!eventData) {
+      return interaction.editReply({ content: "❌ This thread is not linked to an event." });
+    }
 
     if (eventData.isClosed) {
       return interaction.editReply({ content: "This event has been closed and is no longer accepting new signups." });
     }
 
-    const { group, channelId, messageId, hostId } = eventData;
+    const { group, channelId, messageId, hostId, title } = eventData;
 
-    if (!(roleChoice in group)) return interaction.editReply({ content: `❌ ${roleChoice} is not valid for this event.` });
-
-    // Check if already signed up
-    const existing = await EventSignup.findOne({ eventId: eventData._id, userId: targetUser.id });
-    if (existing) {
-      return interaction.editReply({ content: `⚠️ ${targetUser.id === interaction.user.id ? "You are" : `<@${targetUser.id}> is`} already signed up as **${existing.role}**.` });
+    if (!(roleChoice in group)) {
+      return interaction.editReply({ content: `❌ ${roleChoice} is not valid for this event.` });
     }
 
-    // Check role limit
+    // Already signed up?
+    const existing = await EventSignup.findOne({ eventId: eventData._id, userId: targetUser.id });
+    if (existing) {
+      return interaction.editReply({
+        content: `⚠️ ${targetUser.id === interaction.user.id ? "You are" : `<@${targetUser.id}> is`} already signed up as **${existing.role}**.`
+      });
+    }
+
+    // Role limit check
     const count = await EventSignup.countDocuments({ eventId: eventData._id, role: roleChoice });
     if (group[roleChoice] !== Infinity && count >= group[roleChoice]) {
       return interaction.editReply({ content: `❌ The **${roleChoice}** slots are full.` });
     }
 
-    // Create signup
-    await EventSignup.create({ eventId: eventData._id, userId: targetUser.id, role: roleChoice });
+    // Save signup
+    await EventSignup.create({
+      eventId: eventData._id,
+      userId: targetUser.id,
+      role: roleChoice
+    });
 
-    // Rebuild embed
+    // Fetch message
     const channel = await interaction.client.channels.fetch(channelId);
     const message = await channel.messages.fetch(messageId);
-    const embed = EmbedBuilder.from(message.embeds[0]);
 
-    const rolesWithCounts = {};
-    for (const role in group) {
+    // Build updated role lists
+    let messageContent = `**${title.toUpperCase()}**\n`;
+    messageContent += `Hosted by: <@${hostId}>\n`;
+    messageContent += `Use \`/sqjoin\` + role to join | \`/leave\` to leave/change\n\n`;
+
+    for (const [role, limit] of Object.entries(group)) {
       const users = await EventSignup.find({ eventId: eventData._id, role });
-      rolesWithCounts[role] = users;
+
+      const mentions = users.map(u => `<@${u.userId}>`).join("\n") || "-";
+      const emoji = ROLE_EMOJIS[role] || "";
+
+      messageContent += `${emoji} **${role}** (${users.length}/${limit === Infinity ? "∞" : limit})\n`;
+      messageContent += `${mentions}\n\n`;
     }
 
-    embed.setFields(
-      Object.entries(group).map(([role, limit]) => {
-        const users = (rolesWithCounts[role] || []).map(u => `<@${u.userId}>`).join("\n") || "-";
-        const emoji = ROLE_EMOJIS[role] || "";
-        return {
-          name: `${emoji} ${role} (${rolesWithCounts[role].length}/${limit === Infinity ? "∞" : limit})`,
-          value: users,
-          inline: true,
-        };
-      })
-    );
-
-    await message.edit({ embeds: [embed] });
+    // Edit message (NO EMBEDS anymore)
+    await message.edit({ content: messageContent });
 
     // DM host
     try {
@@ -101,11 +108,13 @@ module.exports = {
           ? `${displayName}`
           : `${interaction.user.username} signed up ${displayName}`;
 
-        await host.send(`${signer} as **${roleChoice}** in "${eventData.title}".`);
+        await host.send(`${signer} as **${roleChoice}** in "${title}".`);
       }
-    } catch (err) { console.error(err); }
+    } catch (err) {
+      console.error(err);
+    }
 
-    await interaction.editReply({ 
+    await interaction.editReply({
       content: `✅ ${targetUser.id === interaction.user.id ? "You signed up" : `<@${targetUser.id}> was signed up`} as **${roleChoice}**`
     });
   },

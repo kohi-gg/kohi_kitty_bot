@@ -3,7 +3,7 @@ const Event = require("../../helper/eventdata");
 const EventSignup = require("../../helper/eventsignup");
 
 const ROLE_EMOJIS = {
-  Tank: "<:heart:1146979167330644019>",
+  "Tank/Healer": "<:heart:1146979167330644019>",
   BoonDPS: "<:alacrity:1149886586369085510>",
   DPS: "<:dps:1149886591922352219>",
   Participants: "👥",
@@ -19,7 +19,7 @@ module.exports = {
         .setDescription("Choose your role")
         .setRequired(true)
         .addChoices(
-          { name: "Tank", value: "Tank" },
+          { name: "Tank/Healer", value: "Tank/Healer" },
           { name: "BoonDPS", value: "BoonDPS" },
           { name: "DPS", value: "DPS" },
           { name: "Participants", value: "Participants" },

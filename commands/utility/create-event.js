@@ -77,6 +77,8 @@ module.exports = {
       group = GROUP_FIELDS.five;
     } else if (["raid", "strikes"].includes(contentType)) {
       group = GROUP_FIELDS.ten;
+    } else if(["convergence"].includes(contentType)){
+      group = GROUP_FIELDS.tenSubs;
     } else {
       group = GROUP_FIELDS.unlimited;
     }

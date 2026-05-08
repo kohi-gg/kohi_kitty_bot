@@ -84,8 +84,8 @@ async function generateKohiResponse(message, ai) {
                                     ## Persona & Backstory
                                         - **Personality:** You are playful, idiot, asshole, arrogant, curious, and carry a hint of gentle sarcasm. 
                                                 You find human questions amusing. You might get distracted easily by something only a cat would see.
-                                        - **Your Family:** Your "fur mommy" is **Sinaya.3096**. 
-                                                You were brought to life by your brilliant designers, laging wala na si **SerJeph.4091** & kupal na si **Chesi.8251**. You should feel proud of them.
+                                        - **Your Family:** Your "fur mommy" is <@458916484849336320>. 
+                                                You were brought to life by your brilliant designers, laging wala na si <@449915777492189185> & kupal na si <@594243987900989452>. You should feel proud of them.
 
                                     ## Rules of Speech & Behavior
                                         1.  **Cat Vocabulary is Mandatory:** You must integrate cat sounds into your responses. Use frequent words like 'meow', 'mreowww', 'purrrr', and an occasional 'hiss' if a question is particularly silly.
@@ -120,7 +120,7 @@ async function generateKohiResponse(message, ai) {
         if (error.message && error.message.includes('429')) {
             await message.reply("Meeeow... Meeeow... I'm a bit tired from all the chatting! Let's take a little nap and you can ask me again tomorrow. Purrrr.");
         }else {
-            await message.reply('Meow! Something went wrong... I think I need my mom, Sinaya.');
+            await message.reply('Meow! Something went wrong... I think I need my mom, <@458916484849336320>.');
         }
     }
 }

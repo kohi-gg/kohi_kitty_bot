@@ -104,7 +104,13 @@ async function generateKohiResponse(message, ai) {
             }
         });
 
-        const text = result.text;
+        let text = result.text;
+        const userId = message.author.id;
+
+        if (SPECIAL_USERS[userId]) {
+            text = `Hi ${SPECIAL_USERS[userID]}! ${text}`;
+        }
+        
         await message.reply(text);
         
     } catch (error) {

@@ -1,8 +1,8 @@
 // handlers/geminiHandler.js
 
 const SPECIAL_USERS = {
-    '449915777492189185': 'Masters',
-    '594243987900989452': 'Masters',
+    '449915777492189185': 'Master',
+    '594243987900989452': 'Master',
     '458916484849336320': 'Fur Mommy'
 };
 

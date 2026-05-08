@@ -108,7 +108,7 @@ async function generateKohiResponse(message, ai) {
         const userId = message.author.id;
 
         if (SPECIAL_USERS[userId]) {
-            text = `Hi ${SPECIAL_USERS[userID]}! ${text}`;
+            text = `Hi ${SPECIAL_USERS[userId]}! ${text}`;
         }
         
         await message.reply(text);

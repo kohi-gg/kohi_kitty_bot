@@ -1,5 +1,11 @@
 // handlers/geminiHandler.js
 
+const SPECIAL_USERS = {
+    '449915777492189185': 'Masters',
+    '594243987900989452': 'Masters',
+    '458916484849336320': 'Fur Mommy'
+};
+
 const { HarmCategory, HarmBlockThreshold } = require('@google/genai');
 
 async function generateKohiResponse(message, ai) {

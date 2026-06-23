@@ -136,6 +136,12 @@ client.once(Events.ClientReady, c => {
 
 	startDailyAdvice(client, ADVICE_CHANNEL_ID);
 
+	//LogMembers
+	const startMemberLogs = require('./events/memberLogs.js');
+	const MEMBER_LOG_CHANNEL_ID = '1364930867591516250';
+
+	startMemberLogs(client, MEMBER_LOG_CHANNEL_ID);
+
 	const startCleanupJob = require("./events/dbcleanup.js");
 
 	// After client.login(...)
@@ -151,11 +157,7 @@ client.once(Events.ClientReady, c => {
 	// and less chance of hardcoding the wrong value.
 	scheduleWvwRoleUpdate(client, process.env.WVW_CHANNEL_ID);
 
-	//LogMembers
-	const startMemberLogs = require('./events/memberLogs.js');
-	const MEMBER_LOG_CHANNEL_ID = '1364930867591516250';
-
-	startMemberLogs(client, MEMBER_LOG_CHANNEL_ID);
+	
 
 });
 

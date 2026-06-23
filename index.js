@@ -153,7 +153,7 @@ client.once(Events.ClientReady, c => {
 
 	//LogMembers
 	const startMemberLogs = require('./events/memberLogs.js');
-	startMemberLogs(client);
+	const MEMBER_LOG_CHANNEL_ID = '1364930867591516250';
 
 });
 

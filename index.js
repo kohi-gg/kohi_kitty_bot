@@ -137,10 +137,10 @@ client.once(Events.ClientReady, c => {
 	startDailyAdvice(client, ADVICE_CHANNEL_ID);
 
 	//LogMembers
-	const startMemberLogs = require('./events/memberLogs.js');
+	/*const startMemberLogs = require('./events/memberLogs.js');
 	const MEMBER_LOG_CHANNEL_ID = '1364930867591516250';
 
-	startMemberLogs(client, MEMBER_LOG_CHANNEL_ID);
+	startMemberLogs(client, MEMBER_LOG_CHANNEL_ID);*/
 
 	const startCleanupJob = require("./events/dbcleanup.js");
 

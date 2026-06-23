@@ -1,81 +1,77 @@
-// events/memberLogs.js
+const { Events, EmbedBuilder } = require('discord.js');
 
-const { Events } = require('discord.js');
+function startMemberLogs(client, channelId) {
 
-module.exports = (client) => {
-    const MEMBER_LOG_CHANNEL_ID = "1364930867591516250"
-
-    // Member Join
     client.on(Events.GuildMemberAdd, async (member) => {
         try {
-            const channel = member.guild.channels.cache.get(MEMBER_LOG_CHANNEL_ID);
+            const channel = await client.channels.fetch(channelId);
 
             if (!channel) return;
 
-            await channel.send({
-                embeds: [{
-                    color: 0x57F287,
-                    title: '📥 Member Joined',
-                    thumbnail: {
-                        url: member.user.displayAvatarURL({ dynamic: true })
+            const embed = new EmbedBuilder()
+                .setColor(0x57F287)
+                .setTitle('📥 Member Joined')
+                .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
+                .addFields(
+                    {
+                        name: 'Member',
+                        value: `${member.user.tag} (<@${member.id}>)`,
+                        inline: true
                     },
-                    fields: [
-                        {
-                            name: 'Member',
-                            value: `${member.user.tag} (<@${member.id}>)`,
-                            inline: true
-                        },
-                        {
-                            name: 'Account Created',
-                            value: `<t:${Math.floor(member.user.createdTimestamp / 1000)}:F>`,
-                            inline: true
-                        }
-                    ],
-                    timestamp: new Date().toISOString()
-                }]
-            });
+                    {
+                        name: 'Account Created',
+                        value: `<t:${Math.floor(member.user.createdTimestamp / 1000)}:F>`,
+                        inline: true
+                    },
+                    {
+                        name: 'Member Count',
+                        value: `${member.guild.memberCount}`,
+                        inline: true
+                    }
+                )
+                .setTimestamp();
+
+            await channel.send({ embeds: [embed] });
 
         } catch (error) {
-            console.error('Member join log error:', error);
+            console.error('Error logging member join:', error);
         }
     });
 
-    // Member Leave
     client.on(Events.GuildMemberRemove, async (member) => {
         try {
-            const channel = member.guild.channels.cache.get(MEMBER_LOG_CHANNEL_ID);
+            const channel = await client.channels.fetch(channelId);
 
             if (!channel) return;
 
-            await channel.send({
-                embeds: [{
-                    color: 0xED4245,
-                    title: '📤 Member Left',
-                    thumbnail: {
-                        url: member.user.displayAvatarURL({ dynamic: true })
+            const embed = new EmbedBuilder()
+                .setColor(0xED4245)
+                .setTitle('📤 Member Left')
+                .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
+                .addFields(
+                    {
+                        name: 'Member',
+                        value: `${member.user.tag} (${member.id})`,
+                        inline: true
                     },
-                    fields: [
-                        {
-                            name: 'Member',
-                            value: `${member.user.tag} (${member.id})`,
-                            inline: true
-                        },
-                        {
-                            name: 'Joined Server',
-                            value: member.joinedTimestamp
-                                ? `<t:${Math.floor(member.joinedTimestamp / 1000)}:F>`
-                                : 'Unknown',
-                            inline: true
-                        }
-                    ],
-                    timestamp: new Date().toISOString()
-                }]
-            });
+                    {
+                        name: 'Joined Server',
+                        value: member.joinedTimestamp
+                            ? `<t:${Math.floor(member.joinedTimestamp / 1000)}:F>`
+                            : 'Unknown',
+                        inline: true
+                    }
+                )
+                .setTimestamp();
+
+            await channel.send({ embeds: [embed] });
 
         } catch (error) {
-            console.error('Member leave log error:', error);
+            console.error('Error logging member leave:', error);
         }
     });
 
-    console.log('Member Logs event loaded.');
-};
+    console.log('Member logging initialized.');
+}
+
+module.exports = startMemberLogs;

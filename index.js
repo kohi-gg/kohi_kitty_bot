@@ -150,6 +150,11 @@ client.once(Events.ClientReady, c => {
 	// lagay natin lagi sa env files para mas madali i-configure
 	// and less chance of hardcoding the wrong value.
 	scheduleWvwRoleUpdate(client, process.env.WVW_CHANNEL_ID);
+
+	//LogMembers
+	const startMemberLogs = require('./events/memberLogs.js');
+	startMemberLogs(client);
+
 });
 
 
